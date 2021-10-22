@@ -10,7 +10,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RoomMateys">
         <activity
-            android:name=".MainActivity"
+            android:name=".SettingsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ChatActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ShoppingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ChoreActivity"
+            android:exported="true" />
+        <activity
+            android:name=".MessageActivity"
+            android:exported="true" />
+        <activity
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
