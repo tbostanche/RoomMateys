@@ -91,13 +91,13 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
+    <Button
+        android:id="@+id/logoutButtonTemp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        android:text="Logout (Placeholder)"
+        android:onClick="logoutOnClick"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
