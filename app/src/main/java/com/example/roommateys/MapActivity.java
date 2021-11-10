@@ -1,5 +1,6 @@
 package com.example.roommateys;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -15,43 +16,27 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapActivity extends AppCompatActivity {
 
-    private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LatLng currentPosition = new LatLng(0.0, 0.0);
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12; //could've been any number!
-
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private GoogleMap mMap;
+    private LatLng currentPosition = new LatLng(0.0, 0.0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_map);
-        SupportMapFragment mapFragment = (SupportMapFragment)
-                getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+        setContentView(R.layout.activity_main);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
             displayMyLocation();
         });
-    }
-    public void choreOnClick(View view) {
-        Intent intent = new Intent(this, ChoreActivity.class);
-        startActivity(intent);
-    }
-    public void shoppingOnClick(View view) {
-        Intent intent = new Intent(this, ShoppingActivity.class);
-        startActivity(intent);
-    }
-    public void settingsOnClick(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-    }
-    public void messageOnClick(View view) {
-        Intent intent = new Intent(this, MessageActivity.class);
-        startActivity(intent);
     }
 
     private void displayMyLocation() {
@@ -77,4 +62,38 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * Handles the result of the request for location permissions.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                displayMyLocation();
+            }
+        }
+    }
+
+
+    public void choreOnClick(View view) {
+        Intent intent = new Intent(this, ChoreActivity.class);
+        startActivity(intent);
+    }
+    public void shoppingOnClick(View view) {
+        Intent intent = new Intent(this, ShoppingActivity.class);
+        startActivity(intent);
+    }
+    public void settingsOnClick(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+    public void messageOnClick(View view) {
+        Intent intent = new Intent(this, MessageActivity.class);
+        startActivity(intent);
+    }
 }
