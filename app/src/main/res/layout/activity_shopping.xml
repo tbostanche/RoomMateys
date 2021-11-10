@@ -7,6 +7,7 @@
     tools:context=".ShoppingActivity">
 
     <LinearLayout
+        android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -89,15 +90,18 @@
             android:layout_weight="1" />
 
     </LinearLayout>
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
+
+    <ListView
+        android:id="@+id/shoppingListView"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Shopping"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:longClickable="true"/>
+
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

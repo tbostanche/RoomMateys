@@ -16,9 +16,6 @@
             android:name=".WelcomeActivity"
             android:exported="true" />
         <activity
-            android:name=".MapActivity"
-            android:exported="true" />
-        <activity
             android:name=".SettingsActivity"
             android:exported="true"/>
         <activity
