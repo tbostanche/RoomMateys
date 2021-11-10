@@ -7,6 +7,99 @@
     tools:context=".SettingsActivity">
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/locationToggleContainer">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/diplayLocationTitle"
+                android:text="Display Location"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:layout_margin="5dp" />
+
+            <ToggleButton
+            android:id="@+id/displayLocationToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Display Location"
+            android:layout_margin="5dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/darkModeToggleContainer">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/darkModeTitle"
+                android:text="Darkmode"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:layout_margin="5dp" />
+
+            <ToggleButton
+                android:id="@+id/darkModeToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/leaveHouseContainer">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/leaveHouseTitle"
+                android:text="Leave House"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:layout_margin="5dp" />
+
+            <Button
+                android:id="@+id/leaveHouseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Leave"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/logoutButtonTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Logout (Placeholder)"
+            android:onClick="logoutOnClick"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_margin="5dp"/>
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,15 +184,8 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/logoutButtonTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Logout (Placeholder)"
-        android:onClick="logoutOnClick"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
