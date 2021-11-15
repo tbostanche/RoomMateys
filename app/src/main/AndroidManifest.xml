@@ -3,6 +3,7 @@
     package="com.example.roommateys">
     
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -13,12 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RoomMateys">
-        <activity
-            android:name=".SignupActivity"
-            android:exported="true" />
-        <activity
-            android:name=".WelcomeActivity"
-            android:exported="true" />
         <activity
             android:name=".SettingsActivity"
             android:exported="true"/>
@@ -36,8 +31,10 @@
             android:exported="true" />
         <activity
             android:name=".MessageActivity"
-            android:exported="true">
+            android:exported="true"/>
 
+        <activity android:name=".FirebaseUIActivity"
+            android:exported="true" >
             <!-- Move this back to Login activity -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,10 +42,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAe3sgZAronGw5k4SvdG5vB95zjyu5SzuI" />

@@ -1,5 +1,6 @@
 package com.example.roommateys;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -7,6 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -36,8 +42,26 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void logoutOnClick(View view) {
-        Intent intent = new Intent(this,WelcomeActivity.class);
-        sharedPreferences.edit().remove("isLoggedIn").apply();
-        startActivity(intent);
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Intent intent = new Intent(SettingsActivity.this,FirebaseUIActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
+    }
+    public void deleteAccountOnClick(View view) {
+        AuthUI.getInstance()
+                .delete(this)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Intent intent = new Intent(SettingsActivity.this,FirebaseUIActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
     }
 }

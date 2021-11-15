@@ -18,7 +18,7 @@ public class MessageActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn",false);
         if (!isLoggedIn) {
-            Intent intent = new Intent(this, WelcomeActivity.class);
+            Intent intent = new Intent(this, FirebaseUIActivity.class);
             startActivity(intent);
         }
         setContentView(R.layout.activity_message);
