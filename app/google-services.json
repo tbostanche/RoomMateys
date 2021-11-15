@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "228785295086",
+    "project_id": "roommateys-26523",
+    "storage_bucket": "roommateys-26523.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:228785295086:android:bbce59cdb5ccae98e5adff",
+        "android_client_info": {
+          "package_name": "com.example.roommateys"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "228785295086-29f0fdbt5m6idim7vkgmuu8o1tir1m7f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJWJYr7n7uHbHd4QI0lzgPM1NrDfIekWQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "228785295086-29f0fdbt5m6idim7vkgmuu8o1tir1m7f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
