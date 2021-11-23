@@ -1,7 +1,9 @@
 package com.example.roommateys;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -15,14 +17,20 @@ import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.firebase.ui.auth.util.ExtraConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class FirebaseUIActivity extends AppCompatActivity {
 
@@ -57,14 +65,32 @@ public class FirebaseUIActivity extends AppCompatActivity {
     public void createSignInIntent() {
         // [START auth_fui_create_intent]
         // Choose authentication providers
+//        DynamicLink dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+//                .setLink(Uri.parse("https://roommateys.page.link/test"))
+//                .setDomainUriPrefix("https://roommateys.page.link")
+//                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
+//                .buildDynamicLink();
+//        Uri dynamicLinkUri = dynamicLink.getUri();
+//        Log.d("link",dynamicLinkUri.toString());
+//        ActionCodeSettings emailCodeSettings = ActionCodeSettings.newBuilder()
+//                .setAndroidPackageName(
+//                        "com.example.roommateys",
+//                        true,
+//                        null)
+//                .setHandleCodeInApp(true) // This must be set to true
+//                .setUrl(dynamicLinkUri.toString())
+//                .build();
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
+//                new AuthUI.IdpConfig.EmailBuilder().enableEmailLinkSignIn()
+//                .setActionCodeSettings(emailCodeSettings)
+//                .build(),
                 new AuthUI.IdpConfig.PhoneBuilder().build());
 
         // Create and launch sign-in intent
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
+                //.setEmailLink(dynamicLinkUri.toString())
                 //.setLogo(R.drawable.my_great_logo)      // TODO Set logo drawable
                 //.setTheme(R.style.MySuperAppTheme)      // TODO Set theme
                 .build();
@@ -82,8 +108,11 @@ public class FirebaseUIActivity extends AppCompatActivity {
             startActivity(intent);
         } else {
             Toast toast = new Toast(this);
-            toast.setText(response.getError().getErrorCode());
+            toast.setText(result.getResultCode());
             toast.show();
+            return;
+            //toast.setText(response.getError().getErrorCode());
+            //toast.show();
             // Sign in failed. If response is null the user canceled the
             // sign-in flow using the back button. Otherwise check
             // response.getError().getErrorCode() and handle the error.
@@ -92,49 +121,4 @@ public class FirebaseUIActivity extends AppCompatActivity {
     }
     // [END auth_fui_result]
 
-    public void emailLink() {
-        // [START auth_fui_email_link]
-        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
-                .setAndroidPackageName(
-                         "com.example.roommateys",
-                        true,
-                        null)
-                .setHandleCodeInApp(true) // This must be set to true
-                .setUrl("https://google.com") // This URL needs to be whitelisted
-                .build();
-
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder()
-                        .enableEmailLinkSignIn()
-                        .setActionCodeSettings(actionCodeSettings)
-                        .build()
-        );
-        Intent signInIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build();
-        signInLauncher.launch(signInIntent);
-        // [END auth_fui_email_link]
-    }
-
-    public void catchEmailLink() {
-        List<AuthUI.IdpConfig> providers = Collections.emptyList();
-
-        // [START auth_fui_email_link_catch]
-        if (AuthUI.canHandleIntent(getIntent())) {
-            if (getIntent().getExtras() == null) {
-                return;
-            }
-            String link = getIntent().getExtras().getString(ExtraConstants.EMAIL_LINK_SIGN_IN);
-            if (link != null) {
-                Intent signInIntent = AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setEmailLink(link)
-                        .setAvailableProviders(providers)
-                        .build();
-                signInLauncher.launch(signInIntent);
-            }
-        }
-        // [END auth_fui_email_link_catch]
-    }
 }
