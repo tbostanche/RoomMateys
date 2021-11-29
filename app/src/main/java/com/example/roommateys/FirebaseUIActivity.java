@@ -23,6 +23,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
@@ -55,7 +57,7 @@ public class FirebaseUIActivity extends AppCompatActivity {
         setContentView(R.layout.activity_firebase_ui);
         auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
-            Intent intent = new Intent(this, MessageActivity.class);
+            Intent intent = new Intent(this, PostSignInActivity.class);
             startActivity(intent);
         } else {
             createSignInIntent();
@@ -104,7 +106,8 @@ public class FirebaseUIActivity extends AppCompatActivity {
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            Intent intent = new Intent(this, MessageActivity.class);
+            Intent intent = new Intent(this, PostSignInActivity.class);
+            intent.putExtra("uid",user.getUid());
             startActivity(intent);
         } else {
             Toast toast = new Toast(this);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.roommateys">
-    
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -15,8 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RoomMateys">
         <activity
+            android:name=".PostSignInActivity"
+            android:exported="true" />
+        <activity
             android:name=".SettingsActivity"
-            android:exported="true"/>
+            android:exported="true" />
         <activity
             android:name=".ChatActivity"
             android:exported="true" />
@@ -31,10 +34,11 @@
             android:exported="true" />
         <activity
             android:name=".MessageActivity"
-            android:exported="true"/>
+            android:exported="true" />
+        <activity
+            android:name=".FirebaseUIActivity"
+            android:exported="true">
 
-        <activity android:name=".FirebaseUIActivity"
-            android:exported="true" >
             <!-- Move this back to Login activity -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,18 +46,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="roommateys.page.link"
-                    android:scheme="https"/>
+                    android:scheme="https" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAe3sgZAronGw5k4SvdG5vB95zjyu5SzuI" />
-
     </application>
 
 </manifest>
