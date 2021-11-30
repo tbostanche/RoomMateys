@@ -42,6 +42,7 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void logoutOnClick(View view) {
+        sharedPreferences.edit().remove("isLoggedIn").apply();
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
