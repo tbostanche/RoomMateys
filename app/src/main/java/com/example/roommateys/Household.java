@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Household {
-    public String houseName;
-    public String housePassword;
-    public List<String> members;
+    private String houseName;
+    private String housePassword;
+    private List<String> members;
 
     public Household() {
 
@@ -17,5 +17,21 @@ public class Household {
         this.housePassword = housePassword;
         List<String> firstMemberArr = Arrays.asList(new String[]{firstMember});
         this.members = firstMemberArr;
+    }
+
+    public String getHouseName() {
+        return houseName;
+    }
+
+    public String getHousePassword() {
+        return housePassword;
+    }
+
+    public List<String> getMembers() {
+        return members;
+    }
+
+    public void pushMember(String member) {
+        this.members.add(member);
     }
 }

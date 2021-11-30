@@ -37,6 +37,11 @@ public class PostSignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post_sign_in);
         sharedPreferences = getSharedPreferences("com.example.roommateys",Context.MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn",false);
+        if (isLoggedIn) {
+            Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
+            startActivity(intent);
+            return;
+        }
         db = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -45,7 +50,8 @@ public class PostSignInActivity extends AppCompatActivity {
         EditText editHousePassword = (EditText) findViewById(R.id.editHousePassword);
         houseName = editHouseName.getText().toString();
         housePassword = editHousePassword.getText().toString();
-
+        if (!isLoginValid())
+            return;
         Query queryHouseExists = FirebaseDatabase.getInstance().getReference()
                 .child("Houses")
                 .orderByChild("houseName")
@@ -59,6 +65,8 @@ public class PostSignInActivity extends AppCompatActivity {
         EditText editHousePassword = (EditText) findViewById(R.id.editHousePassword);
         houseName = editHouseName.getText().toString();
         housePassword = editHousePassword.getText().toString();
+        if (!isLoginValid())
+            return;
         Query queryHouseExists = FirebaseDatabase.getInstance().getReference()
                 .child("Houses")
                 .orderByChild("houseName")
@@ -73,10 +81,18 @@ public class PostSignInActivity extends AppCompatActivity {
             if (snapshot.exists()) {
                 if (snapshot.getChildrenCount() == 1){
                     for (DataSnapshot child : snapshot.getChildren()){
-                        for (DataSnapshot nestedChild : child.getChildren()) {
-                            if (nestedChild.getKey().equals("housePassword") && nestedChild.getValue().toString().equals(housePassword)) {
-                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                                db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid()));//TODO don't overwrite existing users
+                        Household household = child.getValue(Household.class);
+                        if (household.getHousePassword().equals(housePassword)) {
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            if (household.getMembers().contains(user.getUid())) { //Shouldn't reach
+                                sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+                                Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
+                                startActivity(intent);
+                                return;
+                            }
+                            else {
+                                household.pushMember(user.getUid());
+                                db.child("Houses").child(houseName).setValue(household);
                                 sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
                                 Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                                 startActivity(intent);
@@ -122,7 +138,19 @@ public class PostSignInActivity extends AppCompatActivity {
         }
     };
 
-    public void joinHouseOnClick() {
-
+    private boolean isLoginValid() {
+        if (houseName.length()<2) {
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "House name must be at least 3 characters",Toast.LENGTH_SHORT);
+            toast.show();
+            return false;
+        }
+        else if (housePassword.length()<8) {
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    "House password must be at least 8 characters",Toast.LENGTH_SHORT);
+            toast.show();
+            return false;
+        }
+        else return true;
     }
 }
