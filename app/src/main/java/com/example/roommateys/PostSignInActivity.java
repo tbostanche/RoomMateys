@@ -52,12 +52,13 @@ public class PostSignInActivity extends AppCompatActivity {
         housePassword = editHousePassword.getText().toString();
         if (!isLoginValid())
             return;
-        Query queryHouseExists = FirebaseDatabase.getInstance().getReference()
-                .child("Houses")
-                .orderByChild("houseName")
-                .equalTo(houseName);
+        Query queryHouseExists = db //query our db
+                .child("Houses") //child database named "Houses"
+                .orderByChild("houseName") //query on houseNames of "Houses"
+                .equalTo(houseName); //any equaling the houseName in the field are returned
 
-        queryHouseExists.addListenerForSingleValueEvent(houseDoesntExistListener);
+        queryHouseExists.addListenerForSingleValueEvent(houseDoesntExistListener); //run this query
+        //once and return a snapshot to the listener
     }
 
     public void createHouseOnClick(View view) {
@@ -67,7 +68,7 @@ public class PostSignInActivity extends AppCompatActivity {
         housePassword = editHousePassword.getText().toString();
         if (!isLoginValid())
             return;
-        Query queryHouseExists = FirebaseDatabase.getInstance().getReference()
+        Query queryHouseExists = db
                 .child("Houses")
                 .orderByChild("houseName")
                 .equalTo(houseName);
@@ -75,29 +76,31 @@ public class PostSignInActivity extends AppCompatActivity {
         queryHouseExists.addListenerForSingleValueEvent(houseExistsListener);
     }
 
+    // called when pressing "join house"
     ValueEventListener houseDoesntExistListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             if (snapshot.exists()) {
-                if (snapshot.getChildrenCount() == 1){
-                    for (DataSnapshot child : snapshot.getChildren()){
-                        Household household = child.getValue(Household.class);
-                        if (household.getHousePassword().equals(housePassword)) {
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (snapshot.getChildrenCount() == 1){ //if there's 1 house with that name already
+                    for (DataSnapshot child : snapshot.getChildren()){ //get that 1 house from the "list" of 1 returned child
+                        Household household = child.getValue(Household.class); //convert it to a java object
+                        if (household.getHousePassword().equals(housePassword)) { //check if the passwords match
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get current authenticated user
+                            //a user should not be in a house and on this screen, TODO remove
                             if (household.getMembers().contains(user.getUid())) { //Shouldn't reach
                                 sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
                                 Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                                 startActivity(intent);
-                                return;
                             }
                             else {
-                                household.pushMember(user.getUid());
-                                db.child("Houses").child(houseName).setValue(household);
-                                sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+                                household.pushMember(user.getUid()); //add member to the java object
+                                db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
+                                sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add logged in preference
+                                sharedPreferences.edit().putString("houseName",houseName); //add house name preference
                                 Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
-                                startActivity(intent);
-                                return;
+                                startActivity(intent); //proceed past this screen
                             }
+                            return;
                         }
                     }
                 }
@@ -116,21 +119,23 @@ public class PostSignInActivity extends AppCompatActivity {
         }
     };
 
+    //called by create house button
     ValueEventListener houseExistsListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             if (snapshot.exists()) {
-                if (snapshot.getChildrenCount() == 1){
+                if (snapshot.getChildrenCount() >= 1){ //list of returned children has housenames
                     Toast toast = Toast.makeText(getApplicationContext(),"House already exists",Toast.LENGTH_SHORT);
                     toast.show();
                     return;
                 }
             }
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid()));
-            sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+            //else house does not yet exist; create new house
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
+            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid())); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add preference
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
-            startActivity(intent);
+            startActivity(intent);// proceed past this screen
         }
         @Override
         public void onCancelled(@NonNull DatabaseError error) {

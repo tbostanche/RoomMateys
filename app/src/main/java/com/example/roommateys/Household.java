@@ -9,12 +9,13 @@ public class Household {
     private List<String> members;
 
     public Household() {
-
+        //required by firebase
     }
 
     public Household(String houseName, String housePassword, String firstMember) {
         this.houseName = houseName;
         this.housePassword = housePassword;
+        //convert string first member into list with 1 member
         List<String> firstMemberArr = Arrays.asList(new String[]{firstMember});
         this.members = firstMemberArr;
     }
@@ -33,5 +34,5 @@ public class Household {
 
     public void pushMember(String member) {
         this.members.add(member);
-    }
+    }//add new member to list
 }
