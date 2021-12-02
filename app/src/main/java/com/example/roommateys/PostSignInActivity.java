@@ -29,6 +29,7 @@ public class PostSignInActivity extends AppCompatActivity {
     private DatabaseReference db;
     private String houseName;
     private String housePassword;
+    private String displayName;
     SharedPreferences sharedPreferences;
 
     @Override
@@ -48,8 +49,10 @@ public class PostSignInActivity extends AppCompatActivity {
     public void joinHouseOnClick(View view) {
         EditText editHouseName = (EditText) findViewById(R.id.editHouseName);
         EditText editHousePassword = (EditText) findViewById(R.id.editHousePassword);
+        EditText editDisplayName = (EditText) findViewById(R.id.editDisplayName);
         houseName = editHouseName.getText().toString();
         housePassword = editHousePassword.getText().toString();
+        displayName = editDisplayName.getText().toString();
         if (!isLoginValid())
             return;
         Query queryHouseExists = db //query our db
@@ -64,8 +67,10 @@ public class PostSignInActivity extends AppCompatActivity {
     public void createHouseOnClick(View view) {
         EditText editHouseName = (EditText) findViewById(R.id.editHouseName);
         EditText editHousePassword = (EditText) findViewById(R.id.editHousePassword);
+        EditText editDisplayName = (EditText) findViewById(R.id.editDisplayName);
         houseName = editHouseName.getText().toString();
         housePassword = editHousePassword.getText().toString();
+        displayName = editDisplayName.getText().toString();
         if (!isLoginValid())
             return;
         Query queryHouseExists = db
@@ -86,20 +91,14 @@ public class PostSignInActivity extends AppCompatActivity {
                         Household household = child.getValue(Household.class); //convert it to a java object
                         if (household.getHousePassword().equals(housePassword)) { //check if the passwords match
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get current authenticated user
-                            //a user should not be in a house and on this screen, TODO remove
-                            if (household.getMembers().contains(user.getUid())) { //Shouldn't reach
-                                sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
-                                Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
-                                startActivity(intent);
-                            }
-                            else {
-                                household.pushMember(user.getUid()); //add member to the java object
-                                db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
-                                sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add logged in preference
-                                sharedPreferences.edit().putString("houseName",houseName); //add house name preference
-                                Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
-                                startActivity(intent); //proceed past this screen
-                            }
+                            String uid = user.getUid();
+                            household.pushMember(uid); //add member to the java object
+                            db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
+                            db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
+                            sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add logged in preference
+                            sharedPreferences.edit().putString("houseName",houseName); //add house name preference
+                            Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
+                            startActivity(intent); //proceed past this screen
                             return;
                         }
                     }
@@ -132,11 +131,30 @@ public class PostSignInActivity extends AppCompatActivity {
             }
             //else house does not yet exist; create new house
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
-            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid())); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            String uid = user.getUid();
+            db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
+            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
             sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add preference
+            sharedPreferences.edit().putString("houseName",houseName);
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
             startActivity(intent);// proceed past this screen
         }
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
+
+    ValueEventListener userExistsListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            if (snapshot.exists()) {
+                if (snapshot.getChildrenCount() == 1) {
+
+                }
+            }
+        }
+
         @Override
         public void onCancelled(@NonNull DatabaseError error) {
 
