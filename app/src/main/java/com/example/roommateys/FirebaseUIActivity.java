@@ -1,6 +1,8 @@
 package com.example.roommateys;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,8 +25,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
@@ -37,8 +43,8 @@ import java.util.logging.Logger;
 public class FirebaseUIActivity extends AppCompatActivity {
 
     FirebaseAuth auth;
+    SharedPreferences sharedPreferences;
 
-    // [START auth_fui_create_launcher]
     // See: https://developer.android.com/training/basics/intents/result
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
@@ -49,12 +55,12 @@ public class FirebaseUIActivity extends AppCompatActivity {
                 }
             }
     );
-    // [END auth_fui_create_launcher]
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_firebase_ui);
+        sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             Intent intent = new Intent(this, PostSignInActivity.class);
@@ -65,63 +71,66 @@ public class FirebaseUIActivity extends AppCompatActivity {
     }
 
     public void createSignInIntent() {
-        // [START auth_fui_create_intent]
-        // Choose authentication providers
-//        DynamicLink dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
-//                .setLink(Uri.parse("https://roommateys.page.link/test"))
-//                .setDomainUriPrefix("https://roommateys.page.link")
-//                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
-//                .buildDynamicLink();
-//        Uri dynamicLinkUri = dynamicLink.getUri();
-//        Log.d("link",dynamicLinkUri.toString());
-//        ActionCodeSettings emailCodeSettings = ActionCodeSettings.newBuilder()
-//                .setAndroidPackageName(
-//                        "com.example.roommateys",
-//                        true,
-//                        null)
-//                .setHandleCodeInApp(true) // This must be set to true
-//                .setUrl(dynamicLinkUri.toString())
-//                .build();
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-//                new AuthUI.IdpConfig.EmailBuilder().enableEmailLinkSignIn()
-//                .setActionCodeSettings(emailCodeSettings)
-//                .build(),
                 new AuthUI.IdpConfig.PhoneBuilder().build());
 
         // Create and launch sign-in intent
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
-                //.setEmailLink(dynamicLinkUri.toString())
                 //.setLogo(R.drawable.my_great_logo)      // TODO Set logo drawable
                 //.setTheme(R.style.MySuperAppTheme)      // TODO Set theme
                 .build();
         signInLauncher.launch(signInIntent);
-        // [END auth_fui_create_intent]
     }
 
-    // [START auth_fui_result]
     private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
         IdpResponse response = result.getIdpResponse();
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            Intent intent = new Intent(this, PostSignInActivity.class);
-            intent.putExtra("uid",user.getUid());
-            startActivity(intent);
+            DatabaseReference db = FirebaseDatabase.getInstance().getReference();
+            Query queryUserExists = db
+                    .child("Users")
+                    .orderByChild("uid")
+                    .equalTo(user.getUid());
+            queryUserExists.addListenerForSingleValueEvent(userExistsListener);
         } else {
-            Toast toast = new Toast(this);
-            toast.setText(result.getResultCode());
+            Toast toast = Toast.makeText(getApplicationContext(),response.getError().getErrorCode(),Toast.LENGTH_SHORT);
             toast.show();
             return;
-            //toast.setText(response.getError().getErrorCode());
-            //toast.show();
             // Sign in failed. If response is null the user canceled the
             // sign-in flow using the back button. Otherwise check
             // response.getError().getErrorCode() and handle the error.
-            // ...
         }
     }
-    // [END auth_fui_result]
+
+    ValueEventListener userExistsListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            if (snapshot.exists()) {
+                if (snapshot.getChildrenCount() == 1) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        //If user already exists, they must be in a house, so skip PostSignInActivity
+                        User user = child.getValue(User.class);
+                        sharedPreferences.edit().putBoolean("isLoggedIn", true).apply();
+                        sharedPreferences.edit().putString("houseName", user.getHouseName());
+                        Intent intent = new Intent(FirebaseUIActivity.this, MessageActivity.class);
+                        startActivity(intent);
+                        return;
+                    }
+                }
+            }
+            //else go to post sign in activity
+            Intent intent = new Intent(FirebaseUIActivity.this, PostSignInActivity.class);
+            startActivity(intent);
+            return;
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
 }

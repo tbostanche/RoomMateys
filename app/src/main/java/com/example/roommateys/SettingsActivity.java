@@ -42,7 +42,7 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void logoutOnClick(View view) {
-        sharedPreferences.edit().remove("isLoggedIn").apply();
+        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -53,7 +53,20 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
     }
+    public void leaveHouseOnClick(View view) {
+        //TODO remove user from database entirely
+        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
+        Intent intent = new Intent(this,PostSignInActivity.class);
+        startActivity(intent);
+    }
+
+    public void changeDisplayNameOnClick(View view) {
+        //TODO change display name of user in db
+    }
+
     public void deleteAccountOnClick(View view) {
+        //TODO remove user from database entirely
+        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
         AuthUI.getInstance()
                 .delete(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
