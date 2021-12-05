@@ -115,6 +115,7 @@ public class FirebaseUIActivity extends AppCompatActivity {
                         User user = child.getValue(User.class);
                         sharedPreferences.edit().putBoolean("isLoggedIn", true).apply();
                         sharedPreferences.edit().putString("houseName", user.getHouseName());
+                        sharedPreferences.edit().putString("displayName",user.getDisplayName());
                         Intent intent = new Intent(FirebaseUIActivity.this, MessageActivity.class);
                         startActivity(intent);
                         return;

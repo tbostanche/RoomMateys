@@ -1,11 +1,12 @@
 package com.example.roommateys;
 
-import android.location.Location;
+
+import com.google.android.gms.maps.model.LatLng;
 
 public class User {
     private String uid;
     private String houseName;
-    private Location location;
+    private LatLng location;
     private String displayName;
 
     public User() {
@@ -17,6 +18,13 @@ public class User {
         this.houseName = houseName;
         this.displayName = displayName;
         this.location = null;
+    }
+
+    public User(String uid,String houseName,String displayName, LatLng location) {
+        this.uid = uid;
+        this.houseName = houseName;
+        this.displayName = displayName;
+        this.location = location;
     }
 
     public String getHouseName() {
@@ -31,7 +39,7 @@ public class User {
         this.uid = uid;
     }
 
-    public Location getLocation() {
+    public LatLng getLocation() {
         return location;
     }
 
@@ -47,7 +55,7 @@ public class User {
         this.houseName = houseName;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(LatLng location) {
         this.location = location;
     }
 
