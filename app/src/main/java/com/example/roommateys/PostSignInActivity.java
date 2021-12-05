@@ -24,6 +24,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class PostSignInActivity extends AppCompatActivity {
 
     private DatabaseReference db;
@@ -78,6 +80,7 @@ public class PostSignInActivity extends AppCompatActivity {
                                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                                 db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid()));//TODO don't overwrite existing users
                                 sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+                                sharedPreferences.edit().putString("houseName", houseName).apply();
                                 Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                                 startActivity(intent);
                                 return;
@@ -110,9 +113,14 @@ public class PostSignInActivity extends AppCompatActivity {
                     return;
                 }
             }
+            ArrayList<String> shoppingList = new ArrayList<>();
+            shoppingList.add("Add shopping items here");
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,user.getUid()));
+            db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
+            db.child("ShoppingLists").child(houseName).child("list").removeValue();
             sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+            sharedPreferences.edit().putString("houseName", houseName).apply();
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
             startActivity(intent);
         }

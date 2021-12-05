@@ -3,10 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/AppData/Android/Projects/RoomMateys/app/src/main/res/layout/activity_firebase_ui.xml" value="0.1" />
-        <entry key="..\:/AppData/Android/Projects/RoomMateys/app/src/main/res/layout/activity_post_sign_in.xml" value="0.2" />
         <entry key="app/src/main/res/layout/activity_chore.xml" value="0.23143115942028986" />
+        <entry key="app/src/main/res/layout/activity_firebase_ui.xml" value="0.3392210144927536" />
         <entry key="app/src/main/res/layout/activity_map.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/activity_post_sign_in.xml" value="0.3392210144927536" />
         <entry key="app/src/main/res/layout/activity_shopping.xml" value="0.23143115942028986" />
         <entry key="app/src/main/res/layout/shopping_list_adapter_layout.xml" value="0.2105978260869565" />
         <entry key="app/src/main/res/menu/chore_list_menu.xml" value="0.25104166666666666" />

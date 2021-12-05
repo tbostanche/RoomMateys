@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -20,19 +22,60 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class ShoppingActivity extends AppCompatActivity {
+    ShoppingList listObject;
     ListView shoppingList;
-    ArrayList<String> shoppingListArray = new ArrayList<>();
+    List<String> shoppingListArray = new ArrayList<>();
     String dialogText;
+    DatabaseReference db;
+    SharedPreferences sharedPreferences;
+    String houseName;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shopping);
+        sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
+        houseName = sharedPreferences.getString("houseName", "NOHOUSEFOUND");
         shoppingList = (ListView) findViewById(R.id.shoppingListView);
+        db = FirebaseDatabase.getInstance().getReference();
+
+        Query findShoppingListQuery = db.child("ShoppingLists").child(houseName);
+        ValueEventListener listListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    if (dataSnapshot.getChildrenCount() == 1) {
+                        Log.i("DB", dataSnapshot.toString());
+
+                        listObject = dataSnapshot.getValue(ShoppingList.class);
+                        shoppingListArray = listObject.shoppingList;
+                        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
+                        shoppingList.setAdapter(adapter);
+                    }
+                } else {
+                    Log.i("DBERROR", dataSnapshot.toString());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+                Log.w("DB_ERROR", "loadList:onCancelled", databaseError.toException());
+            }
+        };
+        findShoppingListQuery.addListenerForSingleValueEvent(listListener);
 
         ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
         shoppingList.setAdapter(adapter);
@@ -52,6 +95,10 @@ public class ShoppingActivity extends AppCompatActivity {
                         shoppingListArray.remove(position);
                         ArrayAdapter adapter1 = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
                         shoppingList.setAdapter(adapter1);
+                        listObject.setShoppingList(shoppingListArray);
+
+                        db.child("ShoppingLists").child(houseName).setValue(listObject);
+                        db.child("ShoppingLists").child(houseName).child("list").removeValue();
                     }
                 });
 
@@ -92,6 +139,10 @@ public class ShoppingActivity extends AppCompatActivity {
                     dialogText = input.getText().toString();
                     shoppingListArray.add(dialogText);
                     shoppingList.setAdapter(new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray));
+                    listObject.setShoppingList(shoppingListArray);
+
+                    db.child("ShoppingLists").child(houseName).setValue(listObject);
+                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
