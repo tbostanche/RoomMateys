@@ -25,6 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class PostSignInActivity extends AppCompatActivity {
 
     private DatabaseReference db;
@@ -131,6 +133,8 @@ public class PostSignInActivity extends AppCompatActivity {
                     return;
                 }
             }
+            ArrayList<String> shoppingList = new ArrayList<>();
+            shoppingList.add("Add shopping items here");
             //else house does not yet exist; create new house
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
             String uid = user.getUid();
@@ -138,6 +142,8 @@ public class PostSignInActivity extends AppCompatActivity {
             LatLng latlng = new LatLng(90,135);
             UserLocation newUser = new UserLocation(displayName,new LatLng(90,135));
             db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,newUser)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
+            db.child("ShoppingLists").child(houseName).child("list").removeValue();
             sharedPreferences.edit().putBoolean("isLoggedIn",true)
                     .putString("houseName",houseName)
                     .putString("displayName",displayName).apply();

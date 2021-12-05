@@ -113,9 +113,9 @@ public class FirebaseUIActivity extends AppCompatActivity {
                     for (DataSnapshot child : snapshot.getChildren()) {
                         //If user already exists, they must be in a house, so skip PostSignInActivity
                         User user = child.getValue(User.class);
-                        sharedPreferences.edit().putBoolean("isLoggedIn", true).apply();
-                        sharedPreferences.edit().putString("houseName", user.getHouseName());
-                        sharedPreferences.edit().putString("displayName",user.getDisplayName());
+                        sharedPreferences.edit().putBoolean("isLoggedIn", true)
+                        .putString("houseName", user.getHouseName())
+                        .putString("displayName",user.getDisplayName()).apply();
                         Intent intent = new Intent(FirebaseUIActivity.this, MessageActivity.class);
                         startActivity(intent);
                         return;
