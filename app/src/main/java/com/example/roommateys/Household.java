@@ -1,23 +1,25 @@
 package com.example.roommateys;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Household {
     private String houseName;
     private String housePassword;
-    private List<String> members;
+    private Map<String, String> members = new HashMap<>();
 
     public Household() {
         //required by firebase
     }
 
-    public Household(String houseName, String housePassword, String firstMember) {
+    public Household(String houseName, String housePassword, String uid, String firstMember) {
         this.houseName = houseName;
         this.housePassword = housePassword;
-        //convert string first member into list with 1 member
-        List<String> firstMemberArr = Arrays.asList(new String[]{firstMember});
-        this.members = firstMemberArr;
+        this.members.put(uid, firstMember);
     }
 
     public String getHouseName() {
@@ -28,11 +30,11 @@ public class Household {
         return housePassword;
     }
 
-    public List<String> getMembers() {
+    public Map<String, String> getMembers() {
         return members;
     }
 
-    public void pushMember(String member) {
-        this.members.add(member);
+    public void pushMember(String uid, String displayName) {
+        this.members.put(uid, displayName);
     }//add new member to list
 }

@@ -1,14 +1,18 @@
 package com.example.roommateys;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -18,67 +22,89 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapActivity extends AppCompatActivity {
 
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12; //could've been any number!
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private GoogleMap mMap;
-    private LatLng currentPosition = new LatLng(0.0, 0.0);
+    private DatabaseReference db;
+    private SharedPreferences sharedPreferences;
+    private HashMap<String, Marker> hashMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        hashMap = new HashMap<>();
+        db = FirebaseDatabase.getInstance().getReference();
+        sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
-            displayMyLocation();
+            Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
+            houseMembers.addChildEventListener(memberLocationChanged);
         });
     }
 
-    private void displayMyLocation() {
-        // check if permission is granted
-        int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION);
-        // if not, ask for it
-        if (permission == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-        // if permission is granted, display marker at current location
-        else {
-            mFusedLocationProviderClient.getCurrentLocation(LocationRequest.QUALITY_HIGH_ACCURACY, null)
-                    .addOnCompleteListener(this, task -> {
-                        Location mLastKnownLocation = task.getResult();
-                        if (task.isSuccessful() && mLastKnownLocation != null) {
-                            currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                            mMap.addMarker(new MarkerOptions().position(currentPosition).title("My Location"));
-                        }
-                    });
-        }
-    }
 
-
-    /**
-     * Handles the result of the request for location permissions.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                displayMyLocation();
+    ChildEventListener memberLocationChanged = new ChildEventListener() {
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            Log.d("locq",snapshot.toString());
+            Log.d("locq",snapshot.getValue().toString());
+            String displayName = "displayName";
+            CustomLatLng latLng = null;
+            for (DataSnapshot child : snapshot.getChildren()) {
+                if (child.getKey().equals(displayName)) {
+                    displayName = child.getValue(String.class);
+                }
+                else {
+                    latLng = child.getValue(CustomLatLng.class);
+                }
             }
+            Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(latLng.getLatitude(),latLng.getLongitude())).title(displayName));
+            hashMap.put(snapshot.getKey(),m);
         }
-    }
 
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            UserLocation ul = snapshot.getValue(UserLocation.class);
+            Marker m = hashMap.get(snapshot.getKey());
+            m.setPosition(ul.getLocation());
+            m.setTitle(ul.getDisplayName());
+            hashMap.remove(snapshot.getKey());
+            hashMap.put(snapshot.getKey(),m);
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+            Log.d("locq",snapshot.toString());
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            Log.d("locq",snapshot.toString());
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+        }
+    };
+
+    private void displayAllRoommates() {
+
+    }
 
     public void choreOnClick(View view) {
         Intent intent = new Intent(this, ChoreActivity.class);

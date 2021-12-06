@@ -13,16 +13,20 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SettingsActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
+    DatabaseReference db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
+        db = FirebaseDatabase.getInstance().getReference();
     }
 
     public void choreOnClick(View view) {
@@ -42,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void logoutOnClick(View view) {
-        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
+        sharedPreferences.edit().clear().apply();
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -54,8 +58,12 @@ public class SettingsActivity extends AppCompatActivity {
                 });
     }
     public void leaveHouseOnClick(View view) {
-        //TODO remove user from database entirely
-        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String houseName = sharedPreferences.getString("houseName",null);
+        db.child("Users").child(uid).removeValue();
+        db.child("Locations").child(houseName).child(uid).removeValue();
+        db.child("Houses").child(houseName).child("members").child(uid).removeValue();
+        sharedPreferences.edit().clear().apply();
         Intent intent = new Intent(this,PostSignInActivity.class);
         startActivity(intent);
     }
@@ -66,7 +74,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void deleteAccountOnClick(View view) {
         //TODO remove user from database entirely
-        sharedPreferences.edit().remove("isLoggedIn").remove("houseName").apply();
+        sharedPreferences.edit().clear().apply();
         AuthUI.getInstance()
                 .delete(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {

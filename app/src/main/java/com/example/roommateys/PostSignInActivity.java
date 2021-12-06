@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -84,6 +85,7 @@ public class PostSignInActivity extends AppCompatActivity {
         queryHouseExists.addListenerForSingleValueEvent(houseExistsListener);
     }
 
+    // called when pressing "join house"
     ValueEventListener houseDoesntExistListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -94,11 +96,13 @@ public class PostSignInActivity extends AppCompatActivity {
                         if (household.getHousePassword().equals(housePassword)) { //check if the passwords match
                             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get current authenticated user
                             String uid = user.getUid();
-                            household.pushMember(uid); //add member to the java object
+                            household.pushMember(uid, displayName); //add member to the java object
                             db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
+                            db.child("Locations").child(houseName).child(uid).setValue(new UserLocation(displayName,new LatLng(90,135)));
                             db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
-                            sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add logged in preference
-                            sharedPreferences.edit().putString("houseName",houseName).apply(); //add house name preference
+                            sharedPreferences.edit().putBoolean("isLoggedIn",true)
+                                    .putString("houseName",houseName)
+                                    .putString("displayName",displayName).apply();
                             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                             startActivity(intent); //proceed past this screen
                             return;
@@ -139,14 +143,15 @@ public class PostSignInActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
             String uid = user.getUid();
             db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
-            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,displayName)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            db.child("Locations").child(houseName).child(uid).setValue( new UserLocation(displayName,new LatLng(90,135)));
             db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
             db.child("ShoppingLists").child(houseName).child("list").removeValue();
+            sharedPreferences.edit().putBoolean("isLoggedIn",true)
+                    .putString("houseName",houseName)
+                    .putString("displayName",displayName).apply();
             db.child("ChoreLists").child(houseName).setValue(new ChoreList(choreList));
             db.child("ChoreLists").child(houseName).child("list").removeValue();
-            sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add preference
-            sharedPreferences.edit().putString("houseName",houseName).apply();
-
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
             startActivity(intent);// proceed past this screen
         }
