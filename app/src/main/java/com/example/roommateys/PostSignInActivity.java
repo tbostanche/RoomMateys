@@ -98,7 +98,7 @@ public class PostSignInActivity extends AppCompatActivity {
                             db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
                             db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
                             sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add logged in preference
-                            sharedPreferences.edit().putString("houseName",houseName); //add house name preference
+                            sharedPreferences.edit().putString("houseName",houseName).apply(); //add house name preference
                             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                             startActivity(intent); //proceed past this screen
                             return;
@@ -132,7 +132,9 @@ public class PostSignInActivity extends AppCompatActivity {
                 }
             }
             ArrayList<String> shoppingList = new ArrayList<>();
-            shoppingList.add("Add shopping items here");
+            ArrayList<String> choreList = new ArrayList<>();
+            shoppingList.add("Milk");
+            choreList.add("Clean the kitchen");
             //else house does not yet exist; create new house
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
             String uid = user.getUid();
@@ -140,8 +142,11 @@ public class PostSignInActivity extends AppCompatActivity {
             db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
             db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
             db.child("ShoppingLists").child(houseName).child("list").removeValue();
+            db.child("ChoreLists").child(houseName).setValue(new ChoreList(choreList));
+            db.child("ChoreLists").child(houseName).child("list").removeValue();
             sharedPreferences.edit().putBoolean("isLoggedIn",true).apply(); //add preference
-            sharedPreferences.edit().putString("houseName",houseName);
+            sharedPreferences.edit().putString("houseName",houseName).apply();
+
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
             startActivity(intent);// proceed past this screen
         }

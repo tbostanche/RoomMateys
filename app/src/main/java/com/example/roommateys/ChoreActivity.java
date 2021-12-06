@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -17,19 +19,58 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChoreActivity extends AppCompatActivity {
-
+    ChoreList listObject;
     ListView choreList;
-    ArrayList<String> choreListArray = new ArrayList<>();
+    List<String> choreListArray = new ArrayList<>();
     String dialogText;
+    DatabaseReference db;
+    String houseName;
+    SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chore);
         choreList = (ListView) findViewById(R.id.choreListView);
+        sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
+        db = FirebaseDatabase.getInstance().getReference();
+        houseName = sharedPreferences.getString("houseName", "NOHOUSEFOUND");
+        Query findChoreList = db.child("ChoreLists").child(houseName);
+
+        ValueEventListener choreListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    if (snapshot.getChildrenCount() == 1) {
+                        listObject = snapshot.getValue(ChoreList.class);
+                        choreListArray = listObject.choreList;
+                        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
+                        choreList.setAdapter(adapter);
+
+                    }
+                } else {
+                    Log.i("DB_ERROR", "No snapshot found");
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.w("DB_ERROR", "loadList:onCancelled", error.toException());
+            }
+        };
+        findChoreList.addListenerForSingleValueEvent(choreListener);
 
         ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
         choreList.setAdapter(adapter);
@@ -48,6 +89,10 @@ public class ChoreActivity extends AppCompatActivity {
                         choreListArray.remove(position);
                         ArrayAdapter adapter1 = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
                         choreList.setAdapter(adapter1);
+                        listObject.setChoreList(choreListArray);
+
+                        db.child("ChoreLists").child(houseName).setValue(listObject);
+                        db.child("ChoreLists").child(houseName).child("list").removeValue();
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -82,6 +127,10 @@ public class ChoreActivity extends AppCompatActivity {
                     dialogText = input.getText().toString();
                     choreListArray.add(dialogText);
                     choreList.setAdapter(new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray));
+                    listObject.setChoreList(choreListArray);
+
+                    db.child("ChoreLists").child(houseName).setValue(listObject);
+                    db.child("ChoreLists").child(houseName).child("list").removeValue();
 
                 }
             });
