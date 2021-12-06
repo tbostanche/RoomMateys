@@ -10,13 +10,13 @@ import java.util.Map;
 public class Household {
     private String houseName;
     private String housePassword;
-    private Map<String, UserLocation> members = new HashMap<>();
+    private Map<String, String> members = new HashMap<>();
 
     public Household() {
         //required by firebase
     }
 
-    public Household(String houseName, String housePassword, String uid, UserLocation firstMember) {
+    public Household(String houseName, String housePassword, String uid, String firstMember) {
         this.houseName = houseName;
         this.housePassword = housePassword;
         this.members.put(uid, firstMember);
@@ -30,11 +30,11 @@ public class Household {
         return housePassword;
     }
 
-    public Map<String, UserLocation> getMembers() {
+    public Map<String, String> getMembers() {
         return members;
     }
 
     public void pushMember(String uid, String displayName) {
-        this.members.put(uid, new UserLocation(displayName,new LatLng(90,135)));
+        this.members.put(uid, displayName);
     }//add new member to list
 }

@@ -52,11 +52,11 @@ public class MapActivity extends AppCompatActivity {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
-            Query houseMembers = db.child("Houses").child(sharedPreferences.getString("houseName","")).child("members");
+            Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
             houseMembers.addChildEventListener(memberLocationChanged);
         });
     }
-    
+
 
     ChildEventListener memberLocationChanged = new ChildEventListener() {
         @Override

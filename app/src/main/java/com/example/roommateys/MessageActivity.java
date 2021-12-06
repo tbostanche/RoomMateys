@@ -63,16 +63,10 @@ public class MessageActivity extends AppCompatActivity {
                         Location mLastKnownLocation = task.getResult();
                         if (task.isSuccessful() && mLastKnownLocation != null) {
                             currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
-                            String uid = user.getUid();
-                            db.child("Users").child(uid).setValue(new User(uid,
-                                    sharedPreferences.getString("houseName",null),
-                                    sharedPreferences.getString("displayName",null),
-                                    currentPosition));
-                            db.child("Houses")
+                            String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                            db.child("Locations")
                                     .child(sharedPreferences.getString("houseName",null))
-                                    .child("members")
-                                    .child(user.getUid())
+                                    .child(uid)
                                     .setValue(new UserLocation(sharedPreferences
                                             .getString("displayName",null),currentPosition));
                         }

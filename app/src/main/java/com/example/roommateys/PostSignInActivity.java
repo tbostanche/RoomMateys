@@ -97,6 +97,7 @@ public class PostSignInActivity extends AppCompatActivity {
                             String uid = user.getUid();
                             household.pushMember(uid, displayName); //add member to the java object
                             db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
+                            db.child("Locations").child(houseName).child(uid).setValue(new UserLocation(displayName,new LatLng(90,135)));
                             db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
                             sharedPreferences.edit().putBoolean("isLoggedIn",true)
                                     .putString("houseName",houseName)
@@ -139,9 +140,8 @@ public class PostSignInActivity extends AppCompatActivity {
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
             String uid = user.getUid();
             db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
-            LatLng latlng = new LatLng(90,135);
-            UserLocation newUser = new UserLocation(displayName,new LatLng(90,135));
-            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,newUser)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,displayName)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
+            db.child("Locations").child(houseName).child(uid).setValue( new UserLocation(displayName,new LatLng(90,135)));
             db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
             db.child("ShoppingLists").child(houseName).child("list").removeValue();
             sharedPreferences.edit().putBoolean("isLoggedIn",true)

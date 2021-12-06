@@ -59,8 +59,10 @@ public class SettingsActivity extends AppCompatActivity {
     }
     public void leaveHouseOnClick(View view) {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String houseName = sharedPreferences.getString("houseName",null);
         db.child("Users").child(uid).removeValue();
-        db.child("Houses").child(sharedPreferences.getString("houseName",null)).child("members").child(uid).removeValue();
+        db.child("Locations").child(houseName).child(uid).removeValue();
+        db.child("Houses").child(houseName).child("members").child(uid).removeValue();
         sharedPreferences.edit().clear().apply();
         Intent intent = new Intent(this,PostSignInActivity.class);
         startActivity(intent);
