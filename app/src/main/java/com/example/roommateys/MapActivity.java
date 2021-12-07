@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,6 +53,11 @@ public class MapActivity extends AppCompatActivity {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(
+                            sharedPreferences.getFloat("houseLatitude", 0.0F),
+                            sharedPreferences.getFloat("houseLongitude",0.0F)),
+                    16));
             Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
             houseMembers.addChildEventListener(memberLocationChanged);
         });

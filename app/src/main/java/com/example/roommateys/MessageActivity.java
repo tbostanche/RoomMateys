@@ -27,7 +27,6 @@ public class MessageActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12; //could've been any number!
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private GoogleMap mMap;
     private LatLng currentPosition = new LatLng(0.0, 0.0);
     private DatabaseReference db;
 
@@ -35,11 +34,7 @@ public class MessageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
-        boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn",false);
-        if (!isLoggedIn) {
-            Intent intent = new Intent(this, FirebaseUIActivity.class);
-            startActivity(intent);
-        }
+        sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
         setContentView(R.layout.activity_message);
         db = FirebaseDatabase.getInstance().getReference();
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);

@@ -2,18 +2,36 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +53,10 @@ public class PostSignInActivity extends AppCompatActivity {
     private String housePassword;
     private String displayName;
     SharedPreferences sharedPreferences;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 12; //could've been any number!
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LatLng currentPosition = new LatLng(0.0, 0.0);
+    private GoogleMap gMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +125,7 @@ public class PostSignInActivity extends AppCompatActivity {
                             sharedPreferences.edit().putBoolean("isLoggedIn",true)
                                     .putString("houseName",houseName)
                                     .putString("displayName",displayName).apply();
+
                             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                             startActivity(intent); //proceed past this screen
                             return;
@@ -135,25 +158,30 @@ public class PostSignInActivity extends AppCompatActivity {
                     return;
                 }
             }
-            ArrayList<String> shoppingList = new ArrayList<>();
-            ArrayList<String> choreList = new ArrayList<>();
-            shoppingList.add("Milk");
-            choreList.add("Clean the kitchen");
-            //else house does not yet exist; create new house
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
-            String uid = user.getUid();
-            db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
-            db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,displayName)); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
-            db.child("Locations").child(houseName).child(uid).setValue( new UserLocation(displayName,new LatLng(90,135)));
-            db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
-            db.child("ShoppingLists").child(houseName).child("list").removeValue();
-            sharedPreferences.edit().putBoolean("isLoggedIn",true)
-                    .putString("houseName",houseName)
-                    .putString("displayName",displayName).apply();
-            db.child("ChoreLists").child(houseName).setValue(new ChoreList(choreList));
-            db.child("ChoreLists").child(houseName).child("list").removeValue();
-            Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
-            startActivity(intent);// proceed past this screen
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+            mapFragment.getMapAsync(googleMap -> {
+                gMap = googleMap;
+                updateMyLocation();
+                gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(@NonNull LatLng latLng) {
+                        Marker tmp = gMap.addMarker(new MarkerOptions().position(latLng));
+                        HouseLocationDialog confirm = new HouseLocationDialog(tmp,houseName,housePassword,displayName);
+                        confirm.show(getSupportFragmentManager(),"Confirmation");
+                        sharedPreferences.edit().putString("houseName",houseName)
+                                .putString("displayName",displayName)
+                                .putFloat("houseLatitude", (float) tmp.getPosition().latitude)
+                                .putFloat("houseLongitude",(float)tmp.getPosition().longitude).apply();
+                    }
+                });
+            });
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.PostSignInContainer, mapFragment)
+                    .commit();
+            findViewById(R.id.createHouseButton).setVisibility(View.GONE);
+            findViewById(R.id.joinHouseButton).setVisibility(View.GONE);
         }
         @Override
         public void onCancelled(@NonNull DatabaseError error) {
@@ -191,5 +219,44 @@ public class PostSignInActivity extends AppCompatActivity {
             return false;
         }
         else return true;
+    }
+
+    private void updateMyLocation() {
+        // check if permission is granted
+        int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION);
+        // if not, ask for it
+        if (permission == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+        // if permission is granted, display marker at current location
+        else {
+            mFusedLocationProviderClient.getCurrentLocation(LocationRequest.QUALITY_HIGH_ACCURACY, null)
+                    .addOnCompleteListener(this, task -> {
+                        Location mLastKnownLocation = task.getResult();
+                        if (task.isSuccessful() && mLastKnownLocation != null) {
+                            currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                            Log.d("locq","a"+currentPosition.latitude+currentPosition.longitude);
+                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition,18));
+                        }
+                    });
+        }
+    }
+    /**
+     * Handles the result of the request for location permissions.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                updateMyLocation();
+            }
+        }
     }
 }
