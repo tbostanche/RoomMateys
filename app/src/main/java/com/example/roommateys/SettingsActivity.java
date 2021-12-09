@@ -2,12 +2,16 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ToggleButton;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,6 +31,10 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         db = FirebaseDatabase.getInstance().getReference();
+        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+            Button darkModeButton = findViewById(R.id.darkModeButton);
+            darkModeButton.setText("ON");
+        }
     }
 
     public void choreOnClick(View view) {
@@ -85,5 +93,19 @@ public class SettingsActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+    }
+
+    public void enableDarkModeOnClick(View view) {
+        Button darkModeButton = findViewById(R.id.darkModeButton);
+        if (darkModeButton.getText().equals("OFF")){
+            darkModeButton.setText("ON");
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+                Log.i("info", "Dark Mode On");
+            }
+        } else {
+            darkModeButton.setText("OFF");
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
     }
 }

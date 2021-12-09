@@ -3,11 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/layout/activity_chat.xml" value="0.125" />
         <entry key="app/src/main/res/layout/activity_chore.xml" value="0.23143115942028986" />
         <entry key="app/src/main/res/layout/activity_firebase_ui.xml" value="0.3392210144927536" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.125" />
         <entry key="app/src/main/res/layout/activity_map.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/activity_message.xml" value="0.125" />
         <entry key="app/src/main/res/layout/activity_post_sign_in.xml" value="0.3392210144927536" />
+        <entry key="app/src/main/res/layout/activity_settings.xml" value="0.335" />
         <entry key="app/src/main/res/layout/activity_shopping.xml" value="0.23143115942028986" />
+        <entry key="app/src/main/res/layout/dark_mode_list_item.xml" value="0.2520833333333333" />
         <entry key="app/src/main/res/layout/shopping_list_adapter_layout.xml" value="0.2105978260869565" />
         <entry key="app/src/main/res/menu/chore_list_menu.xml" value="0.25104166666666666" />
         <entry key="app/src/main/res/menu/shopping_list_menu.xml" value="0.25104166666666666" />

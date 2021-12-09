@@ -2,6 +2,7 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.AlertDialog;
@@ -61,7 +62,9 @@ public class ShoppingActivity extends AppCompatActivity {
 
                         listObject = dataSnapshot.getValue(ShoppingList.class);
                         shoppingListArray = listObject.shoppingList;
+
                         ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
+
                         shoppingList.setAdapter(adapter);
                     }
                 } else {
@@ -78,6 +81,7 @@ public class ShoppingActivity extends AppCompatActivity {
         findShoppingListQuery.addListenerForSingleValueEvent(listListener);
 
         ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
+
         shoppingList.setAdapter(adapter);
         shoppingList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -93,7 +97,9 @@ public class ShoppingActivity extends AppCompatActivity {
                         Log.i("POSITION:", "" + position);
                         Log.i("SIZE", "" + shoppingListArray.size());
                         shoppingListArray.remove(position);
+
                         ArrayAdapter adapter1 = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
+
                         shoppingList.setAdapter(adapter1);
                         listObject.setShoppingList(shoppingListArray);
 

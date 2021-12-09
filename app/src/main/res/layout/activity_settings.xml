@@ -24,7 +24,6 @@
                 android:id="@+id/diplayLocationTitle"
                 android:text="Display Location"
                 android:gravity="center"
-                android:textColor="@color/black"
                 android:layout_margin="5dp" />
 
             <ToggleButton
@@ -48,14 +47,15 @@
                 android:id="@+id/darkModeTitle"
                 android:text="Darkmode"
                 android:gravity="center"
-                android:textColor="@color/black"
                 android:layout_margin="5dp" />
 
-            <ToggleButton
-                android:id="@+id/darkModeToggle"
+            <Button
+                android:id="@+id/darkModeButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"/>
+                android:layout_margin="5dp"
+                android:text="OFF"
+                android:onClick="enableDarkModeOnClick"/>
 
         </LinearLayout>
 
@@ -71,7 +71,6 @@
                 android:id="@+id/leaveHouseTitle"
                 android:text="Leave House"
                 android:gravity="center"
-                android:textColor="@color/black"
                 android:layout_margin="5dp" />
 
             <Button
