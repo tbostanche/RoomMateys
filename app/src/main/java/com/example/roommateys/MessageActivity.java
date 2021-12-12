@@ -63,11 +63,15 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             protected void onBindViewHolder(@NonNull MessageHolder holder, int position, @NonNull Message model) {
                 holder.messageText.setText(model.getMessageText());
-                holder.displayName.setText(model.getDisplayName());
                 if (!FirebaseAuth.getInstance().getCurrentUser().getUid().equals(model.getUid())) {
                     holder.constraintLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    holder.displayName.setText(model.getDisplayName());
                     holder.displayName.setGravity(Gravity.LEFT);
                     holder.messageText.setGravity(Gravity.LEFT);
+                    holder.linearLayout.setGravity(Gravity.LEFT);
+                }
+                else {
+                    holder.displayName.setText("Me");
                 }
             }
 
