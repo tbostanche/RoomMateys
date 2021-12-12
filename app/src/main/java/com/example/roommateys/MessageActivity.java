@@ -3,24 +3,34 @@ package com.example.roommateys;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 public class MessageActivity extends AppCompatActivity {
 
@@ -37,8 +47,57 @@ public class MessageActivity extends AppCompatActivity {
         sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
         setContentView(R.layout.activity_message);
         db = FirebaseDatabase.getInstance().getReference();
+        displayMessages();
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         updateMyLocation();
+    }
+
+    public void displayMessages() {
+        Query query = db.child("Messages")
+                .child(sharedPreferences.getString("houseName",""))
+                .limitToLast(50);
+        FirebaseRecyclerOptions<Message> options = new FirebaseRecyclerOptions.Builder<Message>()
+                .setQuery(query,Message.class)
+                .build();
+        FirebaseRecyclerAdapter adapter = new FirebaseRecyclerAdapter<Message, MessageHolder>(options) {
+            @Override
+            protected void onBindViewHolder(@NonNull MessageHolder holder, int position, @NonNull Message model) {
+                holder.messageText.setText(model.getMessageText());
+                holder.displayName.setText(model.getDisplayName());
+                if (!FirebaseAuth.getInstance().getCurrentUser().getUid().equals(model.getUid())) {
+                    holder.constraintLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    holder.displayName.setGravity(Gravity.LEFT);
+                    holder.messageText.setGravity(Gravity.LEFT);
+                }
+            }
+
+            @NonNull
+            @Override
+            public MessageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater
+                        .from(parent.getContext()).inflate(R.layout.message,parent,false);
+                return new MessageHolder(view);
+            }
+        };
+        RecyclerView recyclerView = findViewById(R.id.MessageRecycler);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter.startListening();
+    }
+
+    public void sendMessageOnClick (View view) {
+        EditText editMessage = (EditText) findViewById(R.id.editMessage);
+        String message = editMessage.getText().toString();
+        if (message.length() == 0) {
+            return;
+        } else if (message.length() > 256) {
+            Toast toast = Toast.makeText(getApplicationContext(),"Max message length: 256",Toast.LENGTH_SHORT);
+            toast.show();
+            return;
+        }
+        DatabaseReference ref = db.child("Messages").child(sharedPreferences.getString("houseName","")).push();
+        ref.setValue(new Message(sharedPreferences.getString("displayName",""),message,FirebaseAuth.getInstance().getCurrentUser().getUid()));
+        editMessage.setText("");
     }
 
     private void updateMyLocation() {
