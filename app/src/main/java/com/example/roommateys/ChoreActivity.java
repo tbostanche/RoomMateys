@@ -70,7 +70,7 @@ public class ChoreActivity extends AppCompatActivity {
                 Log.w("DB_ERROR", "loadList:onCancelled", error.toException());
             }
         };
-        findChoreList.addListenerForSingleValueEvent(choreListener);
+        findChoreList.addValueEventListener(choreListener);
 
         ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
         choreList.setAdapter(adapter);

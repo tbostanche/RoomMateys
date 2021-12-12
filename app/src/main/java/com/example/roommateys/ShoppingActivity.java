@@ -55,6 +55,7 @@ public class ShoppingActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance().getReference();
 
         Query findShoppingListQuery = db.child("ShoppingLists").child(houseName);
+
         ValueEventListener listListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -78,7 +79,7 @@ public class ShoppingActivity extends AppCompatActivity {
                 Log.w("DB_ERROR", "loadList:onCancelled", databaseError.toException());
             }
         };
-        findShoppingListQuery.addListenerForSingleValueEvent(listListener);
+        findShoppingListQuery.addValueEventListener(listListener);
 
         CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
         shoppingList.setAdapter(adapter);
