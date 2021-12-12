@@ -6,6 +6,27 @@
     android:layout_height="match_parent"
     tools:context=".MessageActivity">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/messageingTitle"
+        android:text="Chat"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:textSize="25dp"
+        android:padding="5dp"/>
+
+    <View
+        android:id="@+id/messagingDividingLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@id/messageingTitle"
+        app:layout_constraintBottom_toTopOf="@id/MessageRecycler"
+        />
+
     <LinearLayout
         android:id="@+id/linearLayoutMessage"
         android:layout_width="match_parent"
@@ -137,7 +158,7 @@
         app:layout_constraintBottom_toTopOf="@+id/linearLayoutMessage"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/messagingDividingLine"
         android:id="@+id/MessageRecycler"/>
 
 
