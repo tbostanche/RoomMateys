@@ -4,11 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
@@ -20,6 +24,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -51,24 +57,44 @@ public class MapActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance().getReference();
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+        float houseLatitude = sharedPreferences.getFloat("houseLatitude", 0.0F);
+        float houseLongitude = sharedPreferences.getFloat("houseLongitude",0.0F);
+
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
+            mMap.addMarker(new MarkerOptions()
+                    .icon(generateBitmapDescriptorFromRes(getApplicationContext(),R.drawable.ic_baseline_home_24))
+                    .position(new LatLng(houseLatitude, houseLongitude))
+                    .title("Our House"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(
-                            sharedPreferences.getFloat("houseLatitude", 0.0F),
-                            sharedPreferences.getFloat("houseLongitude",0.0F)),
+                    new LatLng(houseLatitude, houseLongitude),
                     16));
             Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
             houseMembers.addChildEventListener(memberLocationChanged);
         });
     }
 
+    public static BitmapDescriptor generateBitmapDescriptorFromRes(
+            Context context, int resId) {
+        Drawable drawable = ContextCompat.getDrawable(context, resId);
+        drawable.setBounds(
+                0,
+                0,
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
 
     ChildEventListener memberLocationChanged = new ChildEventListener() {
         @Override
         public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            Log.d("locq",snapshot.toString());
-            Log.d("locq",snapshot.getValue().toString());
             String displayName = "displayName";
             CustomLatLng latLng = null;
             for (DataSnapshot child : snapshot.getChildren()) {
@@ -95,12 +121,10 @@ public class MapActivity extends AppCompatActivity {
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-            Log.d("locq",snapshot.toString());
         }
 
         @Override
         public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            Log.d("locq",snapshot.toString());
         }
 
         @Override

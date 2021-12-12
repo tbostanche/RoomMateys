@@ -43,7 +43,6 @@ public class HouseLocationDialog extends AppCompatDialogFragment {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.d("locq","yes");
                         createHouse();
                     }
                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
