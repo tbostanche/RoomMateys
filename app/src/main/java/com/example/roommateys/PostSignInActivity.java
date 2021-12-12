@@ -124,7 +124,10 @@ public class PostSignInActivity extends AppCompatActivity {
                             db.child("Houses").child(houseName).setValue(household); //update the house reference in the db with the java object
                             sharedPreferences.edit().putBoolean("isLoggedIn",true)
                                     .putString("houseName",houseName)
-                                    .putString("displayName",displayName).apply();
+                                    .putString("displayName",displayName)
+                                    .putFloat("houseLatitude", (float) household.getLocation().getLatitude())
+                                    .putFloat("houseLongitude", (float) household.getLocation().getLongitude())
+                                    .apply();
 
                             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
                             startActivity(intent); //proceed past this screen

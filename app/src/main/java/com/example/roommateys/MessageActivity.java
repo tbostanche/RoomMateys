@@ -2,6 +2,7 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +28,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.color.MaterialColors;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -45,6 +47,10 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
+        boolean darkmode = sharedPreferences.getBoolean("darkMode", false);
+        if (darkmode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }
         setContentView(R.layout.activity_message);
         db = FirebaseDatabase.getInstance().getReference();
         displayMessages();
@@ -64,7 +70,7 @@ public class MessageActivity extends AppCompatActivity {
             protected void onBindViewHolder(@NonNull MessageHolder holder, int position, @NonNull Message model) {
                 holder.messageText.setText(model.getMessageText());
                 if (!FirebaseAuth.getInstance().getCurrentUser().getUid().equals(model.getUid())) {
-                    holder.constraintLayout.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                    holder.constraintLayout.setBackgroundColor(MaterialColors.getColor(holder.linearLayout.getContext(),R.attr.colorAccent,Color.GREEN));
                     holder.displayName.setText(model.getDisplayName());
                     holder.displayName.setGravity(Gravity.LEFT);
                     holder.messageText.setGravity(Gravity.LEFT);
@@ -85,7 +91,9 @@ public class MessageActivity extends AppCompatActivity {
         };
         RecyclerView recyclerView = findViewById(R.id.MessageRecycler);
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
         adapter.startListening();
     }
 

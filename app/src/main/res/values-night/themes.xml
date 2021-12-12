@@ -9,6 +9,8 @@
         <item name="colorSecondary">@color/gray_light</item>
         <item name="colorSecondaryVariant">@color/gray_light</item>
         <item name="colorOnSecondary">@color/black</item>
+        <!-- Message colors -->
+        <item name="colorAccent">@color/gray_dark</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->

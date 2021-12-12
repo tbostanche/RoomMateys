@@ -31,7 +31,7 @@
         android:id="@+id/linearLayoutMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/gray_light"
+        android:background="?android:colorAccent"
         android:baselineAligned="false"
         android:gravity="bottom"
         android:maxHeight="120dp"
