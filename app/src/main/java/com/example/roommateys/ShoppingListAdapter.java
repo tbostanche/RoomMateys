@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class CustomAdapter extends ArrayAdapter<ShoppingItem> {
+public class ShoppingListAdapter extends ArrayAdapter<ShoppingItem> {
 
-    public CustomAdapter(Context context, List<ShoppingItem> items) {
+    public ShoppingListAdapter(Context context, List<ShoppingItem> items) {
         super(context, R.layout.shopping_list_adapter_layout, items);
     }
 

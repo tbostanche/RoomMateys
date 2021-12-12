@@ -3,27 +3,27 @@ package com.example.roommateys;
 import java.util.List;
 
 public class ChoreList {
-    public List<String> choreList;
+    public List<ChoreItem> choreList;
 
     public ChoreList() {}
 
-    public ChoreList(List<String> choreList) {
+    public ChoreList(List<ChoreItem> choreList) {
         this.choreList = choreList;
     }
 
-    public void addItem(String item) {
+    public void addItem(ChoreItem item) {
         choreList.add(item);
     }
 
-    public void removeItem(String item) {
+    public void removeItem(ChoreItem item) {
         choreList.remove(item);
     }
 
-    public List<String> getList() {
+    public List<ChoreItem> getList() {
         return choreList;
     }
 
-    public void setChoreList(List<String> choreList) {
+    public void setChoreList(List<ChoreItem> choreList) {
         this.choreList = choreList;
     }
 }

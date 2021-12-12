@@ -63,8 +63,11 @@ public class HouseLocationDialog extends AppCompatDialogFragment {
         rawShoppingList.add(new ShoppingItem("Milk", "Milk Man"));
         shoppingList.setShoppingList(rawShoppingList);
 
-        ArrayList<String> choreList = new ArrayList<>();
-        choreList.add("Clean the kitchen");
+        ChoreList choreList = new ChoreList();
+        List<ChoreItem> rawChoreList = new ArrayList<>();
+        rawChoreList.add(new ChoreItem("Vacuum", "Roomba"));
+        choreList.setChoreList(rawChoreList);
+
         //else house does not yet exist; create new house
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
         String uid = user.getUid();
@@ -73,7 +76,7 @@ public class HouseLocationDialog extends AppCompatDialogFragment {
         db.child("Locations").child(houseName).child(uid).setValue( new UserLocation(displayName,new LatLng(90,135)));
         db.child("ShoppingLists").child(houseName).setValue(shoppingList);
         db.child("ShoppingLists").child(houseName).child("list").removeValue();
-        db.child("ChoreLists").child(houseName).setValue(new ChoreList(choreList));
+        db.child("ChoreLists").child(houseName).setValue(choreList);
         db.child("ChoreLists").child(houseName).child("list").removeValue();
         Intent intent = new Intent(getContext(), MessageActivity.class);
         startActivity(intent);

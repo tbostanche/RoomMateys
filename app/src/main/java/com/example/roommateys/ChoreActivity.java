@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,7 +33,7 @@ import java.util.List;
 public class ChoreActivity extends AppCompatActivity {
     ChoreList listObject;
     ListView choreList;
-    List<String> choreListArray = new ArrayList<>();
+    List<ChoreItem> choreListArray = new ArrayList<>();
     String dialogText;
     DatabaseReference db;
     String houseName;
@@ -43,6 +44,7 @@ public class ChoreActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chore);
         choreList = (ListView) findViewById(R.id.choreListView);
+        registerForContextMenu(choreList);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         db = FirebaseDatabase.getInstance().getReference();
         houseName = sharedPreferences.getString("houseName", "NOHOUSEFOUND");
@@ -55,7 +57,7 @@ public class ChoreActivity extends AppCompatActivity {
                     if (snapshot.getChildrenCount() == 1) {
                         listObject = snapshot.getValue(ChoreList.class);
                         choreListArray = listObject.choreList;
-                        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
+                        ChoreListAdapter adapter = new ChoreListAdapter(ChoreActivity.this, choreListArray);
                         choreList.setAdapter(adapter);
 
                     }
@@ -72,46 +74,101 @@ public class ChoreActivity extends AppCompatActivity {
         };
         findChoreList.addValueEventListener(choreListener);
 
-        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
+        ChoreListAdapter adapter = new ChoreListAdapter(ChoreActivity.this, choreListArray);
         choreList.setAdapter(adapter);
-        choreList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Log.i("LONGCLICK", "Long click detected");
-                AlertDialog.Builder builder = new AlertDialog.Builder(ChoreActivity.this);
-                builder.setTitle("Remove Activity From Chore List");
-                builder.setMessage(String.format("Are you sure you want to remove \"%s\" from the list?", choreListArray.get(position)));
-                builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i("POSITION:", "" + position);
-                        Log.i("SIZE:", "" + choreListArray.size());
-                        choreListArray.remove(position);
-                        ArrayAdapter adapter1 = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray);
-                        choreList.setAdapter(adapter1);
-                        listObject.setChoreList(choreListArray);
 
-                        db.child("ChoreLists").child(houseName).setValue(listObject);
-                        db.child("ChoreLists").child(houseName).child("list").removeValue();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-                if (!isFinishing()) builder.show();
-                return false;
-            }
-        });
     }
+
+    /* OPTIONS MENU */
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.chore_list_menu, menu);
         return true;
     }
+
+    /* CONTEXT MENU */
+
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId()==R.id.choreListView) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.shopping_list_long_click_menu, menu);
+        }
+
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Log.i("LONGCLICK:", "Long click detected");
+
+        // Remove item
+        if (item.getItemId() == R.id.deleteMenuOption) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ChoreActivity.this);
+            builder.setTitle("Remove Item From Chore List");
+            builder.setMessage(String.format("Are you sure you want to remove \"%s\" from the list?", choreListArray.get(info.position).item));
+
+            builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Log.i("POSITION:", "" + info.position);
+                    Log.i("SIZE", "" + choreListArray.size());
+                    choreListArray.remove(info.position);
+                    ChoreListAdapter adapter1 = new ChoreListAdapter(ChoreActivity.this, choreListArray);
+                    choreList.setAdapter(adapter1);
+                    listObject.setChoreList(choreListArray);
+
+                    db.child("ChoreLists").child(houseName).setValue(listObject);
+                    db.child("ChoreLists").child(houseName).child("list").removeValue();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            if (!isFinishing()) builder.show();
+
+            // Assign item
+        } else if (item.getItemId() == R.id.assignMenuOption) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Assignment");
+            final EditText input = new EditText(this);
+            input.setHint("Type here...");
+            builder.setView(input);
+
+            builder.setPositiveButton("Assign", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ChoreItem selectedItem = choreListArray.get(info.position);
+                    String user = input.getText().toString();
+                    selectedItem.setAssignedHousemate(user);
+                    ChoreListAdapter adapter = new ChoreListAdapter(ChoreActivity.this, choreListArray);
+                    choreList.setAdapter(adapter);
+                    listObject.setChoreList(choreListArray);
+
+                    db.child("ChoreLists").child(houseName).setValue(listObject);
+                    db.child("ChoreLists").child(houseName).child("list").removeValue();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            if (!isFinishing()) builder.show();
+
+        } else {
+            return super.onContextItemSelected(item);
+        }
+
+        return true;
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
@@ -125,8 +182,9 @@ public class ChoreActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogText = input.getText().toString();
-                    choreListArray.add(dialogText);
-                    choreList.setAdapter(new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, choreListArray));
+                    choreListArray.add(new ChoreItem(dialogText, "Not Assigned..."));
+                    ChoreListAdapter adapter = new ChoreListAdapter(ChoreActivity.this, choreListArray);
+                    choreList.setAdapter(adapter);
                     listObject.setChoreList(choreListArray);
 
                     db.child("ChoreLists").child(houseName).setValue(listObject);

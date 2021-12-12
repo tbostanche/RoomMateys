@@ -2,8 +2,6 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -19,10 +16,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -65,7 +60,7 @@ public class ShoppingActivity extends AppCompatActivity {
 
                         listObject = dataSnapshot.getValue(ShoppingList.class);
                         shoppingListArray = listObject.shoppingList;
-                        CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
+                        ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
                         shoppingList.setAdapter(adapter);
                     }
                 } else {
@@ -81,7 +76,7 @@ public class ShoppingActivity extends AppCompatActivity {
         };
         findShoppingListQuery.addValueEventListener(listListener);
 
-        CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
+        ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
         shoppingList.setAdapter(adapter);
 
     }
@@ -122,7 +117,7 @@ public class ShoppingActivity extends AppCompatActivity {
                     Log.i("POSITION:", "" + info.position);
                     Log.i("SIZE", "" + shoppingListArray.size());
                     shoppingListArray.remove(info.position);
-                    CustomAdapter adapter1 = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
+                    ShoppingListAdapter adapter1 = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter1);
                     listObject.setShoppingList(shoppingListArray);
 
@@ -153,7 +148,7 @@ public class ShoppingActivity extends AppCompatActivity {
                     ShoppingItem selectedItem = shoppingListArray.get(info.position);
                     String user = input.getText().toString();
                     selectedItem.setAssignedHousemate(user);
-                    CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
+                    ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter);
                     listObject.setShoppingList(shoppingListArray);
 
@@ -190,7 +185,7 @@ public class ShoppingActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     dialogText = input.getText().toString();
                     shoppingListArray.add(new ShoppingItem(dialogText, "Not Assigned..."));
-                    CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
+                    ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter);
                     listObject.setShoppingList(shoppingListArray);
 
