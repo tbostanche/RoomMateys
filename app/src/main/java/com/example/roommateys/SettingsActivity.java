@@ -24,6 +24,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     SharedPreferences sharedPreferences;
     DatabaseReference db;
+    boolean darkmode;
+    boolean shareLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +33,15 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         db = FirebaseDatabase.getInstance().getReference();
-        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
+        darkmode = sharedPreferences.getBoolean("darkMode", false);
+        shareLocation = sharedPreferences.getBoolean("shareLocation", true);
+        if (darkmode){
             Button darkModeButton = findViewById(R.id.darkModeButton);
             darkModeButton.setText("ON");
+        }
+        if (shareLocation){
+            Button shareLocationButton = findViewById(R.id.displayLocationButton);
+            shareLocationButton.setText("ON");
         }
     }
 
@@ -97,15 +105,28 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void enableDarkModeOnClick(View view) {
         Button darkModeButton = findViewById(R.id.darkModeButton);
-        if (darkModeButton.getText().equals("OFF")){
+        if (!darkmode){
             darkModeButton.setText("ON");
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES){
-                Log.i("info", "Dark Mode On");
-            }
+            sharedPreferences.edit().putBoolean("darkMode", true).apply();
         } else {
             darkModeButton.setText("OFF");
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            sharedPreferences.edit().putBoolean("darkMode", false).apply();
+        }
+    }
+
+    public void locationSettingOnClick(View view) {
+        if (shareLocation) {
+            sharedPreferences.edit().putBoolean("shareLocation", false);
+            shareLocation = false;
+            Button shareLocationButton = findViewById(R.id.displayLocationButton);
+            shareLocationButton.setText("OFF");
+        } else {
+            sharedPreferences.edit().putBoolean("shareLocation", true);
+            shareLocation = true;
+            Button shareLocationButton = findViewById(R.id.displayLocationButton);
+            shareLocationButton.setText("ON");
         }
     }
 }
