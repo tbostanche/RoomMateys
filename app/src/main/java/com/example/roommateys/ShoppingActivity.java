@@ -65,7 +65,7 @@ public class ShoppingActivity extends AppCompatActivity {
 
                         listObject = dataSnapshot.getValue(ShoppingList.class);
                         shoppingListArray = listObject.shoppingList;
-                        CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                        CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
                         shoppingList.setAdapter(adapter);
                     }
                 } else {
@@ -81,7 +81,7 @@ public class ShoppingActivity extends AppCompatActivity {
         };
         findShoppingListQuery.addValueEventListener(listListener);
 
-        CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+        CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
         shoppingList.setAdapter(adapter);
 
     }
@@ -122,7 +122,7 @@ public class ShoppingActivity extends AppCompatActivity {
                     Log.i("POSITION:", "" + info.position);
                     Log.i("SIZE", "" + shoppingListArray.size());
                     shoppingListArray.remove(info.position);
-                    CustomAdapter adapter1 = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    CustomAdapter adapter1 = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter1);
                     listObject.setShoppingList(shoppingListArray);
 
@@ -153,7 +153,7 @@ public class ShoppingActivity extends AppCompatActivity {
                     ShoppingItem selectedItem = shoppingListArray.get(info.position);
                     String user = input.getText().toString();
                     selectedItem.setAssignedHousemate(user);
-                    CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter);
                     listObject.setShoppingList(shoppingListArray);
 
@@ -190,7 +190,7 @@ public class ShoppingActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     dialogText = input.getText().toString();
                     shoppingListArray.add(new ShoppingItem(dialogText, "Not Assigned..."));
-                    CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    CustomAdapter adapter = new CustomAdapter(ShoppingActivity.this, shoppingListArray);
                     shoppingList.setAdapter(adapter);
                     listObject.setShoppingList(shoppingListArray);
 
