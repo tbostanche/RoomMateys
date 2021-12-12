@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<EditText xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:hint="Add item here..."
-    android:text="Temp"/>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/shoppingItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Item name here"
+        android:padding="5dp"/>
+
+    <TextView
+        android:id="@+id/assignedHousemate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Not assigned..."
+        android:padding="5dp"/>
+
+</LinearLayout>
 

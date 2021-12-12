@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,7 +37,7 @@ import java.util.List;
 public class ShoppingActivity extends AppCompatActivity {
     ShoppingList listObject;
     ListView shoppingList;
-    List<String> shoppingListArray = new ArrayList<>();
+    List<ShoppingItem> shoppingListArray = new ArrayList<>();
     String dialogText;
     DatabaseReference db;
     SharedPreferences sharedPreferences;
@@ -50,6 +51,7 @@ public class ShoppingActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         houseName = sharedPreferences.getString("houseName", "NOHOUSEFOUND");
         shoppingList = (ListView) findViewById(R.id.shoppingListView);
+        registerForContextMenu(shoppingList);
         db = FirebaseDatabase.getInstance().getReference();
 
         Query findShoppingListQuery = db.child("ShoppingLists").child(houseName);
@@ -62,9 +64,7 @@ public class ShoppingActivity extends AppCompatActivity {
 
                         listObject = dataSnapshot.getValue(ShoppingList.class);
                         shoppingListArray = listObject.shoppingList;
-
-                        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
-
+                        CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
                         shoppingList.setAdapter(adapter);
                     }
                 } else {
@@ -80,46 +80,12 @@ public class ShoppingActivity extends AppCompatActivity {
         };
         findShoppingListQuery.addListenerForSingleValueEvent(listListener);
 
-        ArrayAdapter adapter = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
-
+        CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
         shoppingList.setAdapter(adapter);
-        shoppingList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Log.i("LONGCLICK:", "Long click detected");
-                AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingActivity.this);
-                builder.setTitle("Remove Item From Shopping List");
-                builder.setMessage(String.format("Are you sure you want to remove \"%s\" from the list?", shoppingListArray.get(position)));
-
-                builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Log.i("POSITION:", "" + position);
-                        Log.i("SIZE", "" + shoppingListArray.size());
-                        shoppingListArray.remove(position);
-
-                        ArrayAdapter adapter1 = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray);
-
-                        shoppingList.setAdapter(adapter1);
-                        listObject.setShoppingList(shoppingListArray);
-
-                        db.child("ShoppingLists").child(houseName).setValue(listObject);
-                        db.child("ShoppingLists").child(houseName).child("list").removeValue();
-                    }
-                });
-
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-                if (!isFinishing()) builder.show();
-                return false;
-            }
-        });
 
     }
+
+    /* OPTIONS MENU */
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -128,23 +94,103 @@ public class ShoppingActivity extends AppCompatActivity {
         return true;
     }
 
+    /* CONTEXT MENU */
+
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId()==R.id.shoppingListView) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.shopping_list_long_click_menu, menu);
+        }
+
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        Log.i("LONGCLICK:", "Long click detected");
+
+        // Remove item
+        if (item.getItemId() == R.id.deleteMenuOption) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ShoppingActivity.this);
+            builder.setTitle("Remove Item From Shopping List");
+            builder.setMessage(String.format("Are you sure you want to remove \"%s\" from the list?", shoppingListArray.get(info.position).item));
+
+            builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    Log.i("POSITION:", "" + info.position);
+                    Log.i("SIZE", "" + shoppingListArray.size());
+                    shoppingListArray.remove(info.position);
+                    CustomAdapter adapter1 = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    shoppingList.setAdapter(adapter1);
+                    listObject.setShoppingList(shoppingListArray);
+
+                    db.child("ShoppingLists").child(houseName).setValue(listObject);
+                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            if (!isFinishing()) builder.show();
+
+            // Assign item
+        } else if (item.getItemId() == R.id.assignMenuOption) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Assignment");
+            final EditText input = new EditText(this);
+            input.setHint("Type here...");
+            builder.setView(input);
+
+            builder.setPositiveButton("Assign", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    ShoppingItem selectedItem = shoppingListArray.get(info.position);
+                    String user = input.getText().toString();
+                    selectedItem.setAssignedHousemate(user);
+                    CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    shoppingList.setAdapter(adapter);
+                    listObject.setShoppingList(shoppingListArray);
+
+                    db.child("ShoppingLists").child(houseName).setValue(listObject);
+                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.cancel();
+                }
+            });
+            if (!isFinishing()) builder.show();
+
+        } else {
+            return super.onContextItemSelected(item);
+        }
+
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.newItem) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Title");
-            // Set up the input
             final EditText input = new EditText(this);
             input.setHint("Type here...");
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.setView(input);
-            // Set up the buttons
             builder.setPositiveButton("Add Item", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialogText = input.getText().toString();
-                    shoppingListArray.add(dialogText);
-                    shoppingList.setAdapter(new ArrayAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, shoppingListArray));
+                    shoppingListArray.add(new ShoppingItem(dialogText, "Not Assigned..."));
+                    CustomAdapter adapter = new CustomAdapter(getApplicationContext(), shoppingListArray);
+                    shoppingList.setAdapter(adapter);
                     listObject.setShoppingList(shoppingListArray);
 
                     db.child("ShoppingLists").child(houseName).setValue(listObject);

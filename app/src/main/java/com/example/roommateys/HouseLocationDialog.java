@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HouseLocationDialog extends AppCompatDialogFragment {
     private Marker marker;
@@ -56,9 +57,13 @@ public class HouseLocationDialog extends AppCompatDialogFragment {
 
     private void createHouse(){
         DatabaseReference db = FirebaseDatabase.getInstance().getReference();
-        ArrayList<String> shoppingList = new ArrayList<>();
+
+        ShoppingList shoppingList = new ShoppingList();
+        List<ShoppingItem> rawShoppingList = new ArrayList<>();
+        rawShoppingList.add(new ShoppingItem("Milk", "Milk Man"));
+        shoppingList.setShoppingList(rawShoppingList);
+
         ArrayList<String> choreList = new ArrayList<>();
-        shoppingList.add("Milk");
         choreList.add("Clean the kitchen");
         //else house does not yet exist; create new house
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser(); //get authenticated user
@@ -66,7 +71,7 @@ public class HouseLocationDialog extends AppCompatDialogFragment {
         db.child("Users").child(uid).setValue(new User(uid,houseName,displayName));
         db.child("Houses").child(houseName).setValue(new Household(houseName,housePassword,uid,displayName,marker.getPosition())); //add a new house to the Houses/houseName path, set the value to a new java object with houseName, housePassword, and the first member as this user
         db.child("Locations").child(houseName).child(uid).setValue( new UserLocation(displayName,new LatLng(90,135)));
-        db.child("ShoppingLists").child(houseName).setValue(new ShoppingList(shoppingList));
+        db.child("ShoppingLists").child(houseName).setValue(shoppingList);
         db.child("ShoppingLists").child(houseName).child("list").removeValue();
         db.child("ChoreLists").child(houseName).setValue(new ChoreList(choreList));
         db.child("ChoreLists").child(houseName).child("list").removeValue();
