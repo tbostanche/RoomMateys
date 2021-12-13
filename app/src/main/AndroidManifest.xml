@@ -15,6 +15,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RoomMateys">
         <activity
+            android:name=".SplashScreenActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+        <activity
             android:name=".PostSignInActivity"
             android:exported="true" />
         <activity
@@ -39,12 +50,6 @@
             android:name=".FirebaseUIActivity"
             android:exported="true">
 
-            <!-- Move this back to Login activity -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

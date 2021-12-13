@@ -61,7 +61,7 @@ public class PostSignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post_sign_in);
+        setContentView(R.layout.splash_screen);
         sharedPreferences = getSharedPreferences("com.example.roommateys",Context.MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn",false);
         if (isLoggedIn) {
@@ -69,6 +69,7 @@ public class PostSignInActivity extends AppCompatActivity {
             startActivity(intent);
             return;
         }
+
         db = FirebaseDatabase.getInstance().getReference();
     }
 
