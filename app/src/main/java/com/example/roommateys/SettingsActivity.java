@@ -4,21 +4,34 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ToggleButton;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.internal.location.zzz;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -39,9 +52,9 @@ public class SettingsActivity extends AppCompatActivity {
             Button darkModeButton = findViewById(R.id.darkModeButton);
             darkModeButton.setText("ON");
         }
-        if (shareLocation){
+        if (!shareLocation){
             Button shareLocationButton = findViewById(R.id.displayLocationButton);
-            shareLocationButton.setText("ON");
+            shareLocationButton.setText("OFF");
         }
     }
 
@@ -79,29 +92,37 @@ public class SettingsActivity extends AppCompatActivity {
         db.child("Users").child(uid).removeValue();
         db.child("Locations").child(houseName).child(uid).removeValue();
         db.child("Houses").child(houseName).child("members").child(uid).removeValue();
+        Query queryHouse = db
+                .child("Houses")
+                .orderByChild("houseName")
+                .equalTo(houseName);
+        queryHouse.addListenerForSingleValueEvent(houseEmptyListener);
         sharedPreferences.edit().clear().apply();
         Intent intent = new Intent(this,PostSignInActivity.class);
         startActivity(intent);
     }
 
-    public void changeDisplayNameOnClick(View view) {
-        //TODO change display name of user in db
-    }
 
-    public void deleteAccountOnClick(View view) {
-        //TODO remove user from database entirely
-        sharedPreferences.edit().clear().apply();
-        AuthUI.getInstance()
-                .delete(this)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Intent intent = new Intent(SettingsActivity.this,FirebaseUIActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-    }
+    ValueEventListener houseEmptyListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            for (DataSnapshot child : snapshot.getChildren()) {
+                Household currHouse = child.getValue(Household.class);
+                String houseName = currHouse.getHouseName();
+                if (currHouse.getMembers() == null || currHouse.getMembers().isEmpty()) {
+                    db.child("Houses").child(houseName).removeValue();
+                    db.child("ChoreLists").child(houseName).removeValue();
+                    db.child("Locations").child(houseName).removeValue();
+                    db.child("Messages").child(houseName).removeValue();
+                    db.child("ShoppingLists").child(houseName).removeValue();
+                }
+            }
+        }
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
     public void enableDarkModeOnClick(View view) {
         Button darkModeButton = findViewById(R.id.darkModeButton);
@@ -116,15 +137,34 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("MissingPermission")
     public void locationSettingOnClick(View view) {
         if (shareLocation) {
-            sharedPreferences.edit().putBoolean("shareLocation", false);
+            sharedPreferences.edit().putBoolean("shareLocation", false).apply();
             shareLocation = false;
             Button shareLocationButton = findViewById(R.id.displayLocationButton);
+            db.child("Locations")
+                    .child(sharedPreferences.getString("houseName",null))
+                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .removeValue();
             shareLocationButton.setText("OFF");
         } else {
-            sharedPreferences.edit().putBoolean("shareLocation", true);
+            sharedPreferences.edit().putBoolean("shareLocation", true).apply();
             shareLocation = true;
+            FusedLocationProviderClient mFusedLocationProviderClient =  LocationServices
+                    .getFusedLocationProviderClient(this);
+            mFusedLocationProviderClient.getLastLocation().addOnCompleteListener(
+                    this, task -> {
+                        Location mLastKnownLocation = task.getResult();
+                        if (task.isSuccessful() && mLastKnownLocation != null) {
+                            LatLng currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
+                            db.child("Locations")
+                                    .child(sharedPreferences.getString("houseName",null))
+                                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    .setValue(new UserLocation(sharedPreferences
+                                            .getString("displayName",null),currentPosition));
+                        }
+                    });
             Button shareLocationButton = findViewById(R.id.displayLocationButton);
             shareLocationButton.setText("ON");
         }

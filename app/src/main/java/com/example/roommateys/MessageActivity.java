@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -112,6 +113,7 @@ public class MessageActivity extends AppCompatActivity {
         editMessage.setText("");
     }
 
+    @SuppressLint("MissingPermission")
     private void updateMyLocation() {
         // check if permission is granted
         int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(),
@@ -124,6 +126,11 @@ public class MessageActivity extends AppCompatActivity {
         }
         // if permission is granted, display marker at current location
         else {
+
+            boolean shareLocation = sharedPreferences.getBoolean("shareLocation", true);
+            if (!shareLocation) {
+                return;
+            }
             mFusedLocationProviderClient.getCurrentLocation(LocationRequest.QUALITY_HIGH_ACCURACY, null)
                     .addOnCompleteListener(this, task -> {
                         Location mLastKnownLocation = task.getResult();

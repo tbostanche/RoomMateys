@@ -161,30 +161,12 @@ public class PostSignInActivity extends AppCompatActivity {
                     return;
                 }
             }
-            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-            SupportMapFragment mapFragment = SupportMapFragment.newInstance();
-            mapFragment.getMapAsync(googleMap -> {
-                gMap = googleMap;
-                updateMyLocation();
-                gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                    @Override
-                    public void onMapClick(@NonNull LatLng latLng) {
-                        Marker tmp = gMap.addMarker(new MarkerOptions().position(latLng));
-                        HouseLocationDialog confirm = new HouseLocationDialog(tmp,houseName,housePassword,displayName);
-                        confirm.show(getSupportFragmentManager(),"Confirmation");
-                        sharedPreferences.edit().putString("houseName",houseName)
-                                .putString("displayName",displayName)
-                                .putFloat("houseLatitude", (float) tmp.getPosition().latitude)
-                                .putFloat("houseLongitude",(float)tmp.getPosition().longitude).apply();
-                    }
-                });
-            });
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.PostSignInContainer, mapFragment)
-                    .commit();
             findViewById(R.id.createHouseButton).setVisibility(View.GONE);
             findViewById(R.id.joinHouseButton).setVisibility(View.GONE);
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
+            updateMyLocation();
+            PlaceHouseDialog place = new PlaceHouseDialog();
+            place.show(getSupportFragmentManager(), "Placement");
         }
         @Override
         public void onCancelled(@NonNull DatabaseError error) {
@@ -192,21 +174,30 @@ public class PostSignInActivity extends AppCompatActivity {
         }
     };
 
-    ValueEventListener userExistsListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if (snapshot.exists()) {
-                if (snapshot.getChildrenCount() == 1) {
-
+    private void showMap() {
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
+        mapFragment.getMapAsync(googleMap -> {
+            gMap = googleMap;
+            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition,18));
+            gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(@NonNull LatLng latLng) {
+                    Marker tmp = gMap.addMarker(new MarkerOptions().position(latLng));
+                    HouseLocationDialog confirm = new HouseLocationDialog(tmp,houseName,housePassword,displayName);
+                    confirm.show(supportFragmentManager,"Confirmation");
+                    sharedPreferences.edit().putString("houseName",houseName)
+                            .putString("displayName",displayName)
+                            .putFloat("houseLatitude", (float) tmp.getPosition().latitude)
+                            .putFloat("houseLongitude",(float)tmp.getPosition().longitude).apply();
                 }
-            }
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
-
-        }
-    };
+            });
+        });
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.PostSignInContainer, mapFragment)
+                .commit();
+    }
 
     private boolean isLoginValid() {
         if (houseName.length()<2) {
@@ -241,8 +232,7 @@ public class PostSignInActivity extends AppCompatActivity {
                         Location mLastKnownLocation = task.getResult();
                         if (task.isSuccessful() && mLastKnownLocation != null) {
                             currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
-                            Log.d("locq","a"+currentPosition.latitude+currentPosition.longitude);
-                            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition,18));
+                            showMap();
                         }
                     });
         }
