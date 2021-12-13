@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -28,6 +30,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -46,8 +49,13 @@ public class MapActivity extends AppCompatActivity {
         db = FirebaseDatabase.getInstance().getReference();
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+        String houseName = sharedPreferences.getString("houseName","");
         float houseLatitude = sharedPreferences.getFloat("houseLatitude", 0.0F);
         float houseLongitude = sharedPreferences.getFloat("houseLongitude",0.0F);
+        if (Math.abs(houseLatitude)<.05 && Math.abs(houseLongitude)<.05) {
+            Query houseLocation = db.child("Houses").child(houseName);
+            houseLocation.addListenerForSingleValueEvent(houseExists);
+        }
 
         mapFragment.getMapAsync(googleMap -> {
             mMap = googleMap;
@@ -58,10 +66,40 @@ public class MapActivity extends AppCompatActivity {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(houseLatitude, houseLongitude),
                     15));
-            Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
+            Query houseMembers = db.child("Locations").child(houseName);
             houseMembers.addChildEventListener(memberLocationChanged);
         });
     }
+
+    ValueEventListener houseExists = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            CustomLatLng latLng = null;
+            for (DataSnapshot child : snapshot.getChildren()) {
+                if (child.getKey().equals("location")) {
+                    latLng = child.getValue(CustomLatLng.class);
+                }
+            }
+            sharedPreferences.edit()
+                    .putFloat("houseLatitude", (float) latLng.getLatitude())
+                    .putFloat("houseLongitude", (float) latLng.getLongitude())
+                    .apply();
+            if (mMap !=null) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(latLng.getLatitude(), latLng.getLongitude()),
+                        15));
+                mMap.addMarker(new MarkerOptions()
+                        .icon(generateBitmapDescriptorFromRes(getApplicationContext(),R.drawable.ic_baseline_home_24))
+                        .position(new LatLng(latLng.getLatitude(), latLng.getLongitude()))
+                        .title("Our House"));
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
     public static BitmapDescriptor generateBitmapDescriptorFromRes(
             Context context, int resId) {
