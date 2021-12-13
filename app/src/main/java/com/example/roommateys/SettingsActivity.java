@@ -1,30 +1,22 @@
 package com.example.roommateys;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ToggleButton;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.internal.location.zzz;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -82,12 +74,10 @@ public class SettingsActivity extends AppCompatActivity {
         }
         AuthUI.getInstance()
                 .signOut(this)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Intent intent = new Intent(SettingsActivity.this,FirebaseUIActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
+                .addOnCompleteListener(task -> {
+                    Intent intent = new Intent(SettingsActivity.this,FirebaseUIActivity.class);
+                    startActivity(intent);
+                    finish();
                 });
     }
     public void leaveHouseOnClick(View view) {
@@ -164,7 +154,7 @@ public class SettingsActivity extends AppCompatActivity {
             mFusedLocationProviderClient.getLastLocation().addOnCompleteListener(
                     this, task -> {
                         Location mLastKnownLocation = task.getResult();
-                        if (task.isSuccessful() && mLastKnownLocation != null) {
+                        if (task.isSuccessful()) {
                             LatLng currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
                             db.child("Locations")
                                     .child(sharedPreferences.getString("houseName",null))

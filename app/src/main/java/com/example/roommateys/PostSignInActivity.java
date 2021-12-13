@@ -1,30 +1,21 @@
 package com.example.roommateys;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.app.AppCompatDialogFragment;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.os.Bundle;
-import android.util.JsonReader;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,10 +33,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 
 public class PostSignInActivity extends AppCompatActivity {
@@ -144,7 +131,6 @@ public class PostSignInActivity extends AppCompatActivity {
             }
             Toast toast = Toast.makeText(getApplicationContext(),"House doesn't exist",Toast.LENGTH_SHORT);
             toast.show();
-            return;
         }
 
         @Override
@@ -158,7 +144,7 @@ public class PostSignInActivity extends AppCompatActivity {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             if (snapshot.exists()) {
-                if (snapshot.getChildrenCount() >= 1){ //list of returned children has housenames
+                if (snapshot.getChildrenCount() >= 1){
                     Toast toast = Toast.makeText(getApplicationContext(),"House already exists",Toast.LENGTH_SHORT);
                     toast.show();
                     return;
@@ -183,17 +169,14 @@ public class PostSignInActivity extends AppCompatActivity {
         mapFragment.getMapAsync(googleMap -> {
             gMap = googleMap;
             gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPosition,18));
-            gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                @Override
-                public void onMapClick(@NonNull LatLng latLng) {
-                    Marker tmp = gMap.addMarker(new MarkerOptions().position(latLng));
-                    HouseLocationDialog confirm = new HouseLocationDialog(tmp,houseName,housePassword,displayName);
-                    confirm.show(supportFragmentManager,"Confirmation");
-                    sharedPreferences.edit().putString("houseName",houseName)
-                            .putString("displayName",displayName)
-                            .putFloat("houseLatitude", (float) tmp.getPosition().latitude)
-                            .putFloat("houseLongitude",(float)tmp.getPosition().longitude).apply();
-                }
+            gMap.setOnMapClickListener(latLng -> {
+                Marker tmp = gMap.addMarker(new MarkerOptions().position(latLng));
+                HouseLocationDialog confirm = new HouseLocationDialog(tmp,houseName,housePassword,displayName);
+                confirm.show(supportFragmentManager,"Confirmation");
+                sharedPreferences.edit().putString("houseName",houseName)
+                        .putString("displayName",displayName)
+                        .putFloat("houseLatitude", (float) tmp.getPosition().latitude)
+                        .putFloat("houseLongitude",(float)tmp.getPosition().longitude).apply();
             });
         });
         supportFragmentManager
@@ -234,7 +217,7 @@ public class PostSignInActivity extends AppCompatActivity {
             mFusedLocationProviderClient.getCurrentLocation(LocationRequest.QUALITY_HIGH_ACCURACY, null)
                     .addOnCompleteListener(this, task -> {
                         Location mLastKnownLocation = task.getResult();
-                        if (task.isSuccessful() && mLastKnownLocation != null) {
+                        if (task.isSuccessful()) {
                             currentPosition = new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude());
                             showMap();
                         }

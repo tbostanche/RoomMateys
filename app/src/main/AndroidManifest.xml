@@ -32,9 +32,6 @@
             android:name=".SettingsActivity"
             android:exported="true" />
         <activity
-            android:name=".ChatActivity"
-            android:exported="true" />
-        <activity
             android:name=".ShoppingActivity"
             android:exported="true" />
         <activity

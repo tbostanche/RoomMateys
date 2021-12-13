@@ -16,10 +16,7 @@ public class PlaceHouseDialog extends AppCompatDialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Loading map")
                 .setMessage("Once the map has loaded, please tap the map where you would like to place your house")
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
+                .setPositiveButton("Ok", (dialogInterface, i) -> {
                 });
         return builder.create();
     }

@@ -56,7 +56,6 @@ public class ShoppingActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     if (dataSnapshot.getChildrenCount() == 1) {
-                        Log.i("DB", dataSnapshot.toString());
 
                         listObject = dataSnapshot.getValue(ShoppingList.class);
                         shoppingListArray = listObject.shoppingList;
@@ -103,7 +102,6 @@ public class ShoppingActivity extends AppCompatActivity {
 
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        Log.i("LONGCLICK:", "Long click detected");
 
         // Remove item
         if (item.getItemId() == R.id.deleteMenuOption) {
@@ -111,27 +109,17 @@ public class ShoppingActivity extends AppCompatActivity {
             builder.setTitle("Remove Item From Shopping List");
             builder.setMessage(String.format("Are you sure you want to remove \"%s\" from the list?", shoppingListArray.get(info.position).item));
 
-            builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Log.i("POSITION:", "" + info.position);
-                    Log.i("SIZE", "" + shoppingListArray.size());
-                    shoppingListArray.remove(info.position);
-                    ShoppingListAdapter adapter1 = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
-                    shoppingList.setAdapter(adapter1);
-                    listObject.setShoppingList(shoppingListArray);
+            builder.setPositiveButton("Remove", (dialogInterface, i) -> {
+                shoppingListArray.remove(info.position);
+                ShoppingListAdapter adapter1 = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
+                shoppingList.setAdapter(adapter1);
+                listObject.setShoppingList(shoppingListArray);
 
-                    db.child("ShoppingLists").child(houseName).setValue(listObject);
-                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
-                }
+                db.child("ShoppingLists").child(houseName).setValue(listObject);
+                db.child("ShoppingLists").child(houseName).child("list").removeValue();
             });
 
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.cancel();
-                }
-            });
+            builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
             if (!isFinishing()) builder.show();
 
             // Assign item
@@ -142,27 +130,19 @@ public class ShoppingActivity extends AppCompatActivity {
             input.setHint("Type here...");
             builder.setView(input);
 
-            builder.setPositiveButton("Assign", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    ShoppingItem selectedItem = shoppingListArray.get(info.position);
-                    String user = input.getText().toString();
-                    selectedItem.setAssignedHousemate(user);
-                    ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
-                    shoppingList.setAdapter(adapter);
-                    listObject.setShoppingList(shoppingListArray);
+            builder.setPositiveButton("Assign", (dialogInterface, i) -> {
+                ShoppingItem selectedItem = shoppingListArray.get(info.position);
+                String user = input.getText().toString();
+                selectedItem.setAssignedHousemate(user);
+                ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
+                shoppingList.setAdapter(adapter);
+                listObject.setShoppingList(shoppingListArray);
 
-                    db.child("ShoppingLists").child(houseName).setValue(listObject);
-                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
-                }
+                db.child("ShoppingLists").child(houseName).setValue(listObject);
+                db.child("ShoppingLists").child(houseName).child("list").removeValue();
             });
 
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.cancel();
-                }
-            });
+            builder.setNegativeButton("Cancel", (dialogInterface, i) -> dialogInterface.cancel());
             if (!isFinishing()) builder.show();
 
         } else {
@@ -180,25 +160,17 @@ public class ShoppingActivity extends AppCompatActivity {
             final EditText input = new EditText(this);
             input.setHint("Type here...");
             builder.setView(input);
-            builder.setPositiveButton("Add Item", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialogText = input.getText().toString();
-                    shoppingListArray.add(new ShoppingItem(dialogText, "Not Assigned..."));
-                    ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
-                    shoppingList.setAdapter(adapter);
-                    listObject.setShoppingList(shoppingListArray);
+            builder.setPositiveButton("Add Item", (dialog, which) -> {
+                dialogText = input.getText().toString();
+                shoppingListArray.add(new ShoppingItem(dialogText, "Not Assigned..."));
+                ShoppingListAdapter adapter = new ShoppingListAdapter(ShoppingActivity.this, shoppingListArray);
+                shoppingList.setAdapter(adapter);
+                listObject.setShoppingList(shoppingListArray);
 
-                    db.child("ShoppingLists").child(houseName).setValue(listObject);
-                    db.child("ShoppingLists").child(houseName).child("list").removeValue();
-                }
+                db.child("ShoppingLists").child(houseName).setValue(listObject);
+                db.child("ShoppingLists").child(houseName).child("list").removeValue();
             });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
             builder.show();
         } else {
             return super.onOptionsItemSelected(item);
