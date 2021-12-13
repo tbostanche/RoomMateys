@@ -2,11 +2,13 @@ package com.example.roommateys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -61,15 +63,15 @@ public class PostSignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.splash_screen);
         sharedPreferences = getSharedPreferences("com.example.roommateys",Context.MODE_PRIVATE);
+        setContentView(R.layout.splash_screen);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn",false);
         if (isLoggedIn) {
             Intent intent = new Intent(getApplicationContext(), MessageActivity.class);
             startActivity(intent);
             return;
         }
-
+        setContentView(R.layout.activity_post_sign_in);
         db = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -216,6 +218,7 @@ public class PostSignInActivity extends AppCompatActivity {
         else return true;
     }
 
+    @SuppressLint("MissingPermission")
     private void updateMyLocation() {
         // check if permission is granted
         int permission = ActivityCompat.checkSelfPermission(this.getApplicationContext(),

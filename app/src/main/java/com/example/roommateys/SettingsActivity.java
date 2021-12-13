@@ -75,7 +75,11 @@ public class SettingsActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void logoutOnClick(View view) {
+        boolean darkMode = sharedPreferences.getBoolean("darkMode",false);
         sharedPreferences.edit().clear().apply();
+        if (darkMode) {
+            sharedPreferences.edit().putBoolean("darkMode",true).apply();
+        }
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -89,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void leaveHouseOnClick(View view) {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         String houseName = sharedPreferences.getString("houseName",null);
+        boolean darkMode = sharedPreferences.getBoolean("darkMode",false);
         db.child("Users").child(uid).removeValue();
         db.child("Locations").child(houseName).child(uid).removeValue();
         db.child("Houses").child(houseName).child("members").child(uid).removeValue();
@@ -98,6 +103,9 @@ public class SettingsActivity extends AppCompatActivity {
                 .equalTo(houseName);
         queryHouse.addListenerForSingleValueEvent(houseEmptyListener);
         sharedPreferences.edit().clear().apply();
+        if (darkMode) {
+            sharedPreferences.edit().putBoolean("darkMode",true).apply();
+        }
         Intent intent = new Intent(this,PostSignInActivity.class);
         startActivity(intent);
     }

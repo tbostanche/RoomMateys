@@ -68,7 +68,7 @@ public class MapActivity extends AppCompatActivity {
                     .title("Our House"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(houseLatitude, houseLongitude),
-                    16));
+                    15));
             Query houseMembers = db.child("Locations").child(sharedPreferences.getString("houseName",""));
             houseMembers.addChildEventListener(memberLocationChanged);
         });
@@ -111,16 +111,31 @@ public class MapActivity extends AppCompatActivity {
 
         @Override
         public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-            UserLocation ul = snapshot.getValue(UserLocation.class);
+            String displayName = "displayName";
+            CustomLatLng latLng = null;
+            for (DataSnapshot child : snapshot.getChildren()) {
+                if (child.getKey().equals(displayName)) {
+                    displayName = child.getValue(String.class);
+                }
+                else {
+                    latLng = child.getValue(CustomLatLng.class);
+                }
+            }
             Marker m = hashMap.get(snapshot.getKey());
-            m.setPosition(ul.getLocation());
-            m.setTitle(ul.getDisplayName());
+            if (m==null) {
+                m = mMap.addMarker(new MarkerOptions());
+            }
+            m.setPosition(new LatLng(latLng.getLatitude(), latLng.getLongitude()));
+            m.setTitle(displayName);
             hashMap.remove(snapshot.getKey());
             hashMap.put(snapshot.getKey(),m);
         }
 
         @Override
         public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+            Marker m = hashMap.get(snapshot.getKey());
+            m.remove();
+            hashMap.remove(snapshot.getKey());
         }
 
         @Override

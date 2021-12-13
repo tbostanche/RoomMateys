@@ -78,7 +78,7 @@ public class FirebaseUIActivity extends AppCompatActivity {
         Intent signInIntent = AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setAvailableProviders(providers)
-                //.setLogo(R.drawable.my_great_logo)      // TODO Set logo drawable
+                .setLogo(R.mipmap.ic_launcher_ship_foreground)      // TODO Set logo drawable
                 //.setTheme(R.style.MySuperAppTheme)      // TODO Set theme
                 .build();
         signInLauncher.launch(signInIntent);

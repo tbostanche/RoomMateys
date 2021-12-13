@@ -48,10 +48,6 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences("com.example.roommateys", Context.MODE_PRIVATE);
         sharedPreferences.edit().putBoolean("isLoggedIn",true).apply();
-        boolean darkmode = sharedPreferences.getBoolean("darkMode", false);
-        if (darkmode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        }
         setContentView(R.layout.activity_message);
         db = FirebaseDatabase.getInstance().getReference();
         displayMessages();
