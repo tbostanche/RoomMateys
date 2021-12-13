@@ -32,7 +32,7 @@
             android:layout_weight="1"
             android:contentDescription="Go to Settings"
             android:onClick="settingsOnClick"
-            app:srcCompat="@android:drawable/ic_menu_preferences" />
+            app:srcCompat="@drawable/ic_baseline_settings_24" />
 
         <Space
             android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
             android:layout_weight="1"
             android:contentDescription="Go to Chores"
             android:onClick="choreOnClick"
-            app:srcCompat="@android:drawable/ic_menu_day" />
+            app:srcCompat="@drawable/ic_baseline_cleaning_services_24" />
 
         <Space
             android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
             android:layout_weight="1"
             android:contentDescription="Go to Messages"
             android:onClick="messageOnClick"
-            app:srcCompat="@android:drawable/sym_action_chat" />
+            app:srcCompat="@drawable/ic_baseline_chat_bubble_24" />
 
         <Space
             android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
             android:layout_weight="1"
             android:contentDescription="Go to Shopping List"
             android:onClick="shoppingOnClick"
-            app:srcCompat="@android:drawable/ic_menu_my_calendar" />
+            app:srcCompat="@drawable/ic_baseline_shopping_cart_24" />
 
         <Space
             android:layout_width="wrap_content"
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:contentDescription="Go to Map"
-            app:srcCompat="@android:drawable/ic_menu_mapmode" />
+            app:srcCompat="@drawable/ic_baseline_map_24" />
 
         <Space
             android:layout_width="wrap_content"
